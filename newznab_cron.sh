@@ -28,22 +28,32 @@
 #
 # Configuration
 #
-# If you are going to use the import functionality, be sure you copy nzb-importmodified from#  misc/testing to www/admin.
-# 
-# Set to the directory where Newznab is installed
-NEWZNAB_BASE="/mnt/cache/AppData/Newznab"
+# Check if there is an unRAID plugin config file
 #
-# Set to the directory where NZBs to import are located
-IMPORT_DIR="/mnt/cache/AppData/Newznab/tempnzbs"
-#
-# Interval to run optimization
-OPT_INT=43200
-#
-# Log file
-LOG="/var/log/cron_newznab.log"
-#
-# Debugging, leave off unless you need it
-#set -xv
+if [ -f /boot/config/plugins/newznab_extras/newznab_cron.cfg ]; then
+	source /boot/config/plugins/newznab_extras/newznab_cron.cfg
+	NEWZNAB_BASE=CRON_BASE
+	IMPORT_DIR=CRON_IMPDIR
+	OPT_INT=CRON_OINT
+else
+	#
+	# If running manually, edit these values
+	#
+	# Set to the directory where Newznab is installed
+	NEWZNAB_BASE="/mnt/cache/AppData/Newznab"
+	#
+	# Set to the directory where NZBs to import are located
+	IMPORT_DIR="/mnt/cache/AppData/Newznab/tempnzbs"
+	#
+	# Interval to run optimization
+	OPT_INT=43200
+	#
+	# Log file
+	LOG="/var/log/cron_newznab.log"
+	#
+	# Debugging, leave off unless you need it
+	#set -xv
+fi
 
 # Don't edit below here unless you know what you are doing
 ###################################################################################################
@@ -64,6 +74,15 @@ done
 
 [ "$HELP" ] && echo "`basename $0 .sh` [-q|h]"
 [ "$HELP" ] && exit 1
+
+#####################
+#
+# Check to see if the config file wants to enable options
+#
+[ "$CRON_THREAD" == "enable"] && THREAD=1
+[ "$CRON_PP" == "enable"] && PP=1
+[ "$CRON_IMP" == "enable"] && IMP=1
+
 
 CURRTIME=`date +%s`
 
@@ -92,8 +111,6 @@ if [ $IMP ]; then
 		exit 1
 	fi
 fi
-
-#[ ! "$DOOPT" ] && echo "INFO: Forcing Optimization"
 
 [ ! "$QUIET" ] && echo "INFO: Setting Variables"
 
