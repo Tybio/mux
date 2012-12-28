@@ -40,7 +40,7 @@ IMPORT_DIR="/mnt/cache/AppData/Newznab/tempnzbs"
 OPT_INT=43200
 #
 # Log file
-LOG="/var/log/cron_newznab_process.log"
+LOG="/var/log/cron_newznab.log"
 #
 # Debugging, leave off unless you need it
 #set -xv
