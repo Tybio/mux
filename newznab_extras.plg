@@ -261,11 +261,11 @@ stop() {
 }
 
 status() {
-	if [ $CRON_INTAB ] && echo "Crontab enabled" || echo "Crontab disabled"
+	[ $CRON_INTAB ] && echo "Crontab enabled" || echo "Crontab disabled"
 }
 
 status_check() {
-	if [ $CRON_INTAB ] && echo -n "yes" || echo -n "no"
+	[ $CRON_INTAB ] && echo -n "yes" || echo -n "no"
 }
 
 write_config() {
