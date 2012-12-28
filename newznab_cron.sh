@@ -167,7 +167,7 @@ if [ $DOOPT ]; then
 	$PHPBIN ${NEWZNAB_PATH}/update_theaters.php >> $LOG 2>&1
 	if [ $PP ]; then
 		[ ! "$QUIET" ] && echo "INFO: Updating Release Parsing"
-		$PHPBIN ${NEWZNAB_PATH}/../testing/update_parsing.php >> $LOG 2>&1
+		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_parsing.php >> $LOG 2>&1
 	fi
 	[ ! "$QUIET" ] && echo "INFO: Setting timestamp"
 	echo "$CURRTIME" > /tmp/nn-opt-last.txt
