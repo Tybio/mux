@@ -428,8 +428,8 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 	 			<tr>
 					<td>Enable:</td>
 	       			<td><select name="arg1" size="1">
-					<?=mk_option($nne_cfg['START_STATUS'], "disable", "No");?>
-					<?=mk_option($nne_cfg['START_STATUS'], "enable", "Yes");?>
+					<?=mk_option($newznab_cron_cfg['START_STATUS'], "disable", "No");?>
+					<?=mk_option($newznab_cron_cfg['START_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
