@@ -70,8 +70,8 @@ rm /tmp/newznab_extras-cleanup
 <INLINE>
 <![CDATA[
 # searchd configuration
-START_STATUS="disable"
-NEWZNAB_DIR=""
+SEARCHD_STATUS="disable"
+SEARCHD_BASE=""
 ]]>
 </INLINE>
 </FILE>
@@ -83,7 +83,7 @@ NEWZNAB_DIR=""
 # start|stop|restart searchd.
 
 enable() {
-	START_STATUS=enable
+	SEARCHD_STATUS=enable
 	if [ ! -d $2 ]; then
 		echo "ERROR: Newznab directory does not exist"
 	elif [ ! -f "$NNICMD" ]; then
@@ -107,17 +107,17 @@ sphinx_init() {
 }
 
 disable() {
-	START_STATUS=disable
+	SEARCHD_STATUS=disable
 	write_config
 	stop
 }
 
 change_settings() {
-	NEWZNAB_PATH=$1
+	SEARCHD_BASE=$1
 }
 
 start() {
-	if [ "$START_STATUS" == "disable" ]; then
+	if [ "SEARCHD_STATUS" == "disable" ]; then
 		echo "ERROR: Disabled, run /etc/rc.d/rc.searchd enable"
 	else
 		[ -f $SPXCFG ] && $NNICMD daemon > /dev/null 2>&1
@@ -145,13 +145,13 @@ status_check() {
 }
 
 write_config() {
-	echo "START_STATUS=\"$START_STATUS\"" > /boot/config/plugins/newznab_extras/searchd.cfg
-	echo "NEWZNAB_PATH=\"$NEWZNAB_PATH\"" >> /boot/config/plugins/newznab_extras/searchd.cfg
+	echo "SEARCHD_STATUS=\"$SEARCHD_STATUS\"" > /boot/config/plugins/newznab_extras/searchd.cfg
+	echo "SEARCHD_BASE=\"$SEARCHD_BASE\"" >> /boot/config/plugins/newznab_extras/searchd.cfg
 }
 
 source /boot/config/plugins/newznab_extras/searchd.cfg
-NNICMD="$NEWZNAB_PATH/misc/sphinx/nnindexer.php"
-SPXDIR="$NEWZNAB_PATH/db/sphinxdata"
+NNICMD="$SEARCHD_BASE/misc/sphinx/nnindexer.php"
+SPXDIR="$SEARCHD_BASE/db/sphinxdata"
 SPXCFG="$SPXDIR/sphinx.conf"
 [ -f "$SPXDIR/searchd.pid" ] && PID=1
 
@@ -192,17 +192,15 @@ esac
 <INLINE>
 <![CDATA[
 # searchd configuration
-START_STATUS="disable"
-NEWZNAB_BASE=""
+CRON_STATUS="disable"
+CRON_BASE=""
 CRON_FILE="/var/spool/cron/crontabs/root"
 CRON_INT="10"
 CRON_OINT="43200"
 CRON_IMP="disable"
 CRON_IMPDIR=""
-CRON_THREAD="disable"
 CRON_PP="disable"
-CRON_IMP="disable"
-CRON_QUIET="enable"
+CRON_THREAD="disable"
 ]]>
 </INLINE>
 </FILE>
@@ -214,7 +212,7 @@ CRON_QUIET="enable"
 # start|stop|restart searchd.
 
 enable() {
-	START_STATUS=enable
+	CRON_STATUS=enable
 	if [ ! -d $2 ]; then
 		echo "ERROR: Newznab directory does not exist"
 	else
@@ -232,24 +230,27 @@ check_file() {
 }
 
 disable() {
-	START_STATUS=disable
+	CRON_STATUS=disable
 	change_settings $2 $3 $4 $5 $6 $7 $8 $9
 	write_config
 	stop
 }
 
 change_settings() {
-	NEWZNAB_BASE=$1
+	CRON_BASE=$1
 	CRON_FILE=$2
 	CRON_INT=$3
 	CRON_OINT=$4
 	CRON_IMP=$5
 	CRON_IMPDIR=$6
 	CRON_PP=$7
-	CRON_OINT=$8
+	CRON_THREAD=$8
 }
 
 start() {
+	if [ "$CRON_STATUS" == "disable" ]; then
+		echo "ERROR: Disabled, run /etc/rc.d/rc.searchd enable"
+	else
 	if [ ! $CRON_INTAB ] echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
 }
 
@@ -268,8 +269,8 @@ status_check() {
 }
 
 write_config() {
-	echo "START_STATUS=\"$START_STATUS\"" > /boot/config/plugins/newznab_extras/searchd.cfg
-	echo "NEWZNAB_BASE=\"$NEWZNAB_BASE\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
+	echo "CRON_STATUS=\"$START_STATUS\"" > /boot/config/plugins/newznab_extras/newznab_cron.cfg
+	echo "CRON_BASE=\"$NEWZNAB_BASE\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_FILE=\"$CRON_FILE\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_INT=\"$CRON_INIT\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_OINT=\"$CRON_OINT\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
@@ -391,13 +392,13 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				<tr>
 					<td>Enable:</td>
 	       			<td><select name="arg1" size="1">
-					<?=mk_option($nne_cfg['START_STATUS'], "disable", "No");?>
-					<?=mk_option($nne_cfg['START_STATUS'], "enable", "Yes");?>
+					<?=mk_option($searchd_cfg['SEARCHD_STATUS'], "disable", "No");?>
+					<?=mk_option($searchd_cfg['SEARCHD_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="arg2" maxlength="40" value="<?=$nne_cfg['NEWZNAB_PATH'];?>"></td>
+					<td><input type="text" name="arg2" maxlength="40" value="<?=$searchd_cfg['SEARCHD_BASE'];?>"></td>
 				</tr>
 					<td></td>
 					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
@@ -428,13 +429,13 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 	 			<tr>
 					<td>Enable:</td>
 	       			<td><select name="arg1" size="1">
-					<?=mk_option($newznab_cron_cfg['START_STATUS'], "disable", "No");?>
-					<?=mk_option($newznab_cron_cfg['START_STATUS'], "enable", "Yes");?>
+					<?=mk_option($newznab_cron_cfg['CRON_STATUS'], "disable", "No");?>
+					<?=mk_option($newznab_cron_cfg['CRON_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="arg2" maxlength="40" value="<?=$newznab_cron_cfg['NEWZNAB_BASE'];?>"></td>
+					<td><input type="text" name="arg2" maxlength="40" value="<?=$newznab_cron_cfg['CRON_BASE'];?>"></td>
 				</tr>
 				<tr>
 					<td>Crontab file:</td>
