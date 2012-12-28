@@ -224,7 +224,7 @@ enable() {
 
 check_file() {
 	if [ ! -f /boot/config/plugins/newznab_extras/newznab_cron.sh ]; then
-		wget -N http://raw.github.com/Tybio/mux/master/newznab_extras.plg -O /boot/config/plugins/newznab_extras/newznab_cron.sh --no-check-certificate
+		wget -N http://raw.github.com/Tybio/mux/master/newznab_extras.plg -O /boot/config/plugins/newznab_extras/newznab_cron.sh --no-check-certificate > /dev/null 2>&1
 	fi
 }
 
