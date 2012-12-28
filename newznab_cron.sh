@@ -49,7 +49,7 @@ else
 	OPT_INT=43200
 	#
 	# Log file
-	LOG="/var/log/cron_newznab.log"
+	LOG="/var/log/newznab_cron.log"
 	#
 	# Debugging, leave off unless you need it
 	#set -xv
