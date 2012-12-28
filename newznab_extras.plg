@@ -255,9 +255,11 @@ start() {
 }
 
 stop() {
-	sed '/newznab/d' /var/spool/cron/crontabs/root > /tmp/crontab.tmp
-	crontab /tmp/crontab.tmp
-	kill -TERM -$(pgrep -o newznab_cron.sh) 
+	if [ ! $CRON_INTAB ]; then
+		sed '/newznab/d' /var/spool/cron/crontabs/root > /tmp/crontab.tmp
+		crontab /tmp/crontab.tmp
+		kill -TERM -$(pgrep -o newznab_cron.sh) 
+	fi
 }
 
 status() {
