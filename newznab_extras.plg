@@ -250,7 +250,8 @@ start() {
 	if [ "$CRON_STATUS" == "disable" ]; then
 		echo "ERROR: Disabled, run /etc/rc.d/rc.searchd enable"
 	else
-	if [ ! $CRON_INTAB ] echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
+		[ ! $CRON_INTAB ] && echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
+	fi
 }
 
 stop() {
