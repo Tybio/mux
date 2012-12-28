@@ -1,0 +1,471 @@
+<?xml version='1.0' standalone='yes'?>
+<PLUGIN>
+
+<!-- sphinxsearch file - Tybio - 12/22/2012 -->
+
+<!-- 
+Required plugins
+The distribution of sphinxsearch requires postgres libraries.  When I can rebuild
+       sphinxsearch from source without postgres dependencies this will be removed 
+-->
+<FILE Name="/boot/packages/postgresql-8.4.4-i486-1sl.txz" Run="upgradepkg --install-new">
+<URL>http://slackware.org.uk/slacky/slackware-13.1/database/postgresql/8.4.4/postgresql-8.4.4-i486-1sl.txz</URL>
+</FILE>
+
+<!-- Converted Deb package directly from the sphinxsearch site -->
+<FILE Name="/boot/packages/sphinxsearch_2.0.6_i386.tgz" Run="upgradepkg --install-new">
+<URL>http://mux.net/~tybio/plugins/sphinxsearch_2.0.6_i386.tgz</URL>
+</FILE>
+
+<!-- Terminfo package required for Screen -->
+<FILE Name="/boot/packages/aaa_terminfo-5.7-noarch-1.txz" Run="upgradepkg --install-new">
+<URL>http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/a/aaa_terminfo-5.7-noarch-1.txz</URL>
+</FILE>
+
+<!-- uTemper package required for Screen -->
+<FILE Name="/boot/packages/utempter-1.1.5-i486-1.txz" Run="upgradepkg --install-new">
+<URL>http://slackware.cs.utah.edu/pub/slackware/slackware-13.37/slackware/a/utempter-1.1.5-i486-1.txz</URL>
+</FILE>
+
+<!-- Screen package -->
+<FILE Name="/boot/packages/screen-4.0.3-i486-1.txz" Run="upgradepkg --install-new">
+<URL>http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/ap/screen-4.0.3-i486-1.txz</URL>
+</FILE>
+
+<!-- htop package -->
+<FILE Name="/boot/packages/htop-0.8.3-i486-3sl.txz" Run="upgradepkg --install-new">
+<URL>http://repository.slacky.eu/slackware-13.1/hardware/htop/0.8.3/htop-0.8.3-i486-3sl.txz</URL>
+</FILE>
+
+<!-- Icon -->
+<FILE Name="/boot/config/plugins/newznab_extras/newznab_extras.png">
+<URL>http://mux.net/~tybio/plugins/newznab_extras.png</URL>
+</FILE>
+
+<!-- clean up previous install -->
+<FILE Name="/tmp/newznab_extras-cleanup" Run="/usr/bin/bash">
+<INLINE>
+<![CDATA[
+[ -d /usr/local/emhttp/plugins/newznab_extras ] && rm -f -R /usr/local/emhttp/plugins/newznab_extras
+[ -f /etc/rc.d/rc.searchd ] && rm -f /etc/rc.d/rc.searchd
+[ -f /etc/rc.d/rc.newznab_cron ] && rm -f /etc/rc.d/rc.newznab_cron
+[ -f /boot/config/plugins/newznab_extras/plgver.txt ] && rm -f /boot/config/plugins/newznab_extras/plgver.txt
+[ -f /usr/local/emhttp/plugins/newznab_extras/event/disks_mounted ] && rm -f /usr/local/emhttp/plugins/newznab_extras/event/disks_mounted
+[ -f /usr/local/emhttp/plugins/newznab_extras/event/unmounting_disks ] && rm -f /usr/local/emhttp/plugins/newznab_extras/event/unmounting_disks
+rm /tmp/newznab_extras-cleanup
+]]>
+</INLINE>
+</FILE>
+
+<FILE Name="/boot/config/plugins/newznab_extras/plgver.txt">
+<INLINE>
+<![CDATA[
+0.2
+]]>
+</INLINE>
+</FILE>
+
+<!-- Configuration File -->
+<FILE Name="/boot/config/plugins/newznab_extras/searchd.cfg">
+<INLINE>
+<![CDATA[
+# searchd configuration
+START_STATUS="disable"
+NEWZNAB_DIR=""
+]]>
+</INLINE>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.searchd" Mode="0770">
+<INLINE>
+<![CDATA[
+#!/bin/sh
+# start|stop|restart searchd.
+
+enable() {
+	START_STATUS=enable
+	if [ ! -d $2 ]; then
+		echo "ERROR: Newznab directory does not exist"
+	elif [ ! -f "$NNICMD" ]; then
+		echo "ERROR: Newznab not installed in configured directory"
+	else
+		change_settings $2
+		write_config
+		[ ! -f "$SPXCFG" ] && sphinx_init
+		start
+	fi
+}
+
+sphinx_init() {
+	$NNICMD generate > /dev/null 2>&1
+	$NNICMD daemon > /dev/null 2>&1
+	sleep 2
+	$NNICMD index full all > /dev/null 2>&1
+	$NNICMD	index delta all > /dev/null 2>&1
+	$NNICMD daemon --stop > /dev/null 2>&1
+	sleep 2
+}
+
+disable() {
+	START_STATUS=disable
+	write_config
+	stop
+}
+
+change_settings() {
+	NEWZNAB_PATH=$1
+}
+
+start() {
+	if [ "$START_STATUS" == "disable" ]; then
+		echo "ERROR: Disabled, run /etc/rc.d/rc.searchd enable"
+	else
+		[ -f $SPXCFG ] && $NNICMD daemon > /dev/null 2>&1
+	fi
+}
+
+stop() {
+	[ $PID ] && $NNICMD daemon --stop > /dev/null 2>&1
+}
+
+restart() {
+		[ $PID ] && $NNICMD daemon --stop > /dev/null 2>&1
+		sleep 3
+		$NNICMD daemon > /dev/null 2>&1
+}
+
+status() {
+	[ $PID ] && echo "searchd: Running" || echo "searchd: Not Running"
+	[ $PID ] && STATS=`indextool --dumpheader $SPXDIR/releases.sph 2> /dev/null | grep 'version\|total-'`
+	[ $PID ] && echo -n "$STATS"
+}
+
+status_check() {
+	[ $PID ] && echo -n "yes" || echo -n "no"
+}
+
+write_config() {
+	echo "START_STATUS=\"$START_STATUS\"" > /boot/config/plugins/newznab_extras/searchd.cfg
+	echo "NEWZNAB_PATH=\"$NEWZNAB_PATH\"" >> /boot/config/plugins/newznab_extras/searchd.cfg
+}
+
+source /boot/config/plugins/newznab_extras/searchd.cfg
+NNICMD="$NEWZNAB_PATH/misc/sphinx/nnindexer.php"
+SPXDIR="$NEWZNAB_PATH/db/sphinxdata"
+SPXCFG="$SPXDIR/sphinx.conf"
+[ -f "$SPXDIR/searchd.pid" ] && PID=1
+
+case "$1" in
+	'enable')
+		enable $1 $2
+	;;
+	'disable')
+		disable $1 $2
+	;;
+	'start')
+		start
+	;;
+	'stop')
+		stop
+	;;
+	'restart')
+		restart
+	;;
+	'status')
+		status
+	;;
+	'status_check')
+		status_check
+	;;
+	'write_config')
+		write_config
+	;;	
+	*)
+		echo "usage $0 start|stop|restart|status|status_check|enable|disable"
+esac
+]]>
+</INLINE>
+</FILE>
+
+<!-- Configuration File -->
+<FILE Name="/boot/config/plugins/newznab_extras/newznab_cron.cfg">
+<INLINE>
+<![CDATA[
+# searchd configuration
+START_STATUS="disable"
+NEWZNAB_DIR=""
+CRON_FILE="/var/spool/cron/crontabs/root"
+CRON_INT="10"
+]]>
+</INLINE>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.newznab_cron" Mode="0770">
+<INLINE>
+<![CDATA[
+#!/bin/sh
+# start|stop|restart searchd.
+
+enable() {
+	START_STATUS=enable
+	if [ ! -d $2 ]; then
+		echo "ERROR: Newznab directory does not exist"
+	else
+		change_settings $2
+		write_config
+		newznab_cron_init
+		start
+	fi
+}
+
+newznab_cron_init() {
+	check_file
+	if grep -Fxq "newznab_cron.sh" "$CRON_FILE"
+	then
+		echo "ERROR: script already in cron, check crontab by hand for consistancy"
+		exit
+	else
+		echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
+	fi
+}
+
+check_file() {
+	if [ ! -f /boot/config/plugins/newznab_extras/newznab_cron.sh ]
+		cd /boot/config/plugins/newznab_extras/
+		wget -N http://mux.net/~tybio/plugins/newznab_cron.sh
+}
+
+disable() {
+	START_STATUS=disable
+	write_config
+	stop
+}
+
+change_settings() {
+	NEWZNAB_PATH=$1
+	CRON_FILE=$2
+	CRON_INT=$3
+}
+
+start() {
+	if [ "$START_STATUS" == "disable" ]; then
+		echo "ERROR: Disabled, run /etc/rc.d/rc.newznab_cron enable"
+	else
+		[ -f $SPXCFG ] && $NNICMD daemon > /dev/null 2>&1
+	fi
+}
+
+stop() {
+	[ $PID ] && $NNICMD daemon --stop > /dev/null 2>&1
+}
+
+restart() {
+		[ $PID ] && $NNICMD daemon --stop > /dev/null 2>&1
+		sleep 3
+		$NNICMD daemon > /dev/null 2>&1
+}
+
+status() {
+	[ $PID ] && echo "searchd: Running" || echo "searchd: Not Running"
+	[ $PID ] && STATS=`indextool --dumpheader $SPXDIR/releases.sph 2> /dev/null | grep 'version\|total-'`
+	[ $PID ] && echo -n "$STATS"
+}
+
+status_check() {
+	[ $PID ] && echo -n "yes" || echo -n "no"
+}
+
+write_config() {
+	echo "START_STATUS=\"$START_STATUS\"" > /boot/config/plugins/newznab_extras/searchd.cfg
+	echo "NEWZNAB_PATH=\"$NEWZNAB_PATH\"" >> /boot/config/plugins/newznab_extras/searchd.cfg
+}
+
+source /boot/config/plugins/newznab_extras/newznab_cron.cfg
+=""
+SPXDIR="$NEWZNAB_PATH/db/sphinxdata"
+SPXCFG="$SPXDIR/sphinx.conf"
+[ -f "$SPXDIR/searchd.pid" ] && PID=1
+
+case "$1" in
+	'enable')
+		enable $1 $2
+	;;
+	'disable')
+		disable $1 $2
+	;;
+	'start')
+		start
+	;;
+	'stop')
+		stop
+	;;
+	'restart')
+		restart
+	;;
+	'status')
+		status
+	;;
+	'status_check')
+		status_check
+	;;
+	'write_config')
+		write_config
+	;;	
+	*)
+		echo "usage $0 start|stop|restart|status|status_check|enable|disable"
+esac
+]]>
+</INLINE>
+</FILE>
+
+<!-- Configuration Page -->
+<FILE Name="/usr/local/emhttp/plugins/sphinxsearch/sphinxsearch.page">
+<INLINE>
+<![CDATA[
+Menu="NetworkServices"
+Icon="sphinxsearch.png"
+Version="0.2"
+Author="Tybio"
+Type="php"
+]]>
+</INLINE>
+</FILE>
+
+<!-- Setup Icon -->
+<FILE Name="/usr/local/emhttp/plugins/sphinxsearch/sphinxsearch.png">
+<LOCAL>/boot/config/plugins/sphinxsearch/sphinxsearch.png</LOCAL>
+</FILE>
+
+<!-- Main Plugin Page -->
+<FILE Name="/usr/local/emhttp/plugins/sphinxsearch/sphinxsearch.php">
+<INLINE>
+<![CDATA[
+<?PHP
+$nne_cfg = parse_ini_file( "/boot/config/plugins/sphinxsearch/sphinxsearch.cfg");
+#$newznab_cfg = parse_ini_file( "/boot/config/plugins/newznab/newznab.cfg" );
+$HASCFG = ( file_exists("$NEWZNAB_PATH/db/sphinxdata/sphinx.conf") ) ?"1":"0";
+$IDXNUM = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
+$sphinx_running = shell_exec ( "/etc/rc.d/rc.sphinxsearch status_check" );
+$sphinx_stats = shell_exec ( "/etc/rc.d/rc.sphinxsearch status");
+$cron_inst = ( file_exists("/boot/config/plugins/sphinxsearch/cron_newznab_process.sh") ) ?"1":"0";
+?>
+<script type="text/javascript">
+	function show(obj) {
+		no = obj.options[obj.selectedIndex].value;
+		count = obj.options.length;
+		for(i=1;i<count;i++)
+			document.getElementById('myDiv'+i).style.display = 'none';
+			if(no>0)
+				document.getElementById('myDiv'+no).style.display = 'block';
+			}
+  </script>
+<div>
+        <div id="title">
+                <span class="left">Configure:&#32;&emsp;</span>
+                <select onchange="show(this)">
+                    <option value="0">Chose</option>
+                    <option value="1">SphinxSearch</option>
+                    <option value="2">NewznabCron</option>
+                    </select>
+                
+        </div>
+</div>
+<div id="myDiv1" style="display: none;">
+	<div style="width: 49%; float:left">
+		<div id="title">
+			<span class="left">Status:&#32;
+				<?if($sphinx_running=="yes"):?>	
+					<span class="green"><b>RUNNING</b></span>
+				<?else:?>
+					<span class="red"><b>NOT RUNNING</b></span>
+				<?endif;?>	
+			</span>
+		</div>
+	</div>
+	<div style="width: 49%; float:right">
+		<div id="title">
+			<span class="left">Configuration:&#32;</span>
+		</div>
+		<form name="sphinxsearch_settings" method="POST" action="/update.htm" target="progressFrame">
+			<input type="hidden" name="cmd" value="/etc/rc.d/rc.sphinxsearch">
+			<table class="settings">
+	 			<tr>
+					<td>Enable:</td>
+	       			<td><select name="arg1" size="1">
+					<?=mk_option($nne_cfg['START_STATUS'], "disable", "No");?>
+					<?=mk_option($nne_cfg['START_STATUS'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Newznab directory:</td>
+					<td><input type="text" name="arg2" maxlength="40" value="<?=$nne_cfg['NEWZNAB_PATH'];?>"></td>
+				</tr>
+					<td></td>
+					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>
+<div id="myDiv2" style="display: none;">
+	<div style="width: 49%; float:left">
+		<div id="title">
+			<span class="left">Status:&#32;
+				<?if($cron_inst=="yes"):?>	
+					<span class="green"><b>INSTALLED</b></span>
+				<?else:?>
+					<span class="red"><b>NOT INSTALLED</b></span>
+				<?endif;?>	
+			</span>
+		</div>
+	</div>
+	<div style="width: 49%; float:right">
+		<div id="title">
+			<span class="left">Configuration:&#32;</span>
+		</div>
+		<form name="cron_settings" method="POST" action="/update.htm" target="progressFrame">
+			<input type="hidden" name="cmd" value="/etc/rc.d/rc.newznabcron">
+			<table class="settings">
+	 			<tr>
+					<td>Enable:</td>
+	       			<td><select name="arg1" size="1">
+					<?=mk_option($nne_cfg['START_STATUS'], "disable", "No");?>
+					<?=mk_option($nne_cfg['START_STATUS'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Newznab directory:</td>
+					<td><input type="text" name="arg2" maxlength="40" value="<?=$nne_cfg['NEWZNAB_PATH'];?>"></td>
+				</tr>
+					<td></td>
+					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>
+]]>
+</INLINE>
+</FILE>
+
+<!-- event handler -->
+<FILE Name="/usr/local/emhttp/plugins/sphinxsearch/event/disks_mounted" Mode="0770">
+<INLINE>
+<![CDATA[
+#!/bin/bash
+/etc/rc.d/rc.sphinxsearch start
+]]>
+</INLINE>
+</FILE>
+
+<!-- event handler -->
+<FILE Name="/usr/local/emhttp/plugins/sphinxsearch/event/unmounting_disks" Mode="0770">
+<INLINE>
+<![CDATA[
+#!/bin/bash
+/etc/rc.d/rc.sphinxsearch stop
+]]>
+</INLINE>
+</FILE>
+
+</PLUGIN>
