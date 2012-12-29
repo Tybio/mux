@@ -96,9 +96,9 @@ function log {
 #
 # Check to see if the config file wants to enable options
 #
-[ "$CRON_THREAD" == "enable"] && THREAD=1
-[ "$CRON_PP" == "enable"] && PP=1
-[ "$CRON_IMP" == "enable"] && IMP=1
+[ "$CRON_THREAD" == "enable" ] && THREAD=1
+[ "$CRON_PP" == "enable" ] && PP=1
+[ "$CRON_IMP" == "enable" ] && IMP=1
 
 
 CURRTIME=`date +%s`
