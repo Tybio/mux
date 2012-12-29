@@ -294,7 +294,7 @@ source /boot/config/plugins/newznab_extras/newznab_cron.cfg
 #fi
 
 grep -q newznab_cron $CRON_FILE
-[[ !? -eq 0 ]] && CRON_INTAB="1"
+[[ $? -eq 0 ]] && CRON_INTAB="1"
 
 case "$1" in
 	'enable')
