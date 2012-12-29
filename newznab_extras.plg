@@ -383,6 +383,9 @@ $CRON_IMPDIR=$_POST['CRON_IMPDIR'];
 $CRON_PP=$_POST['CRON_PP'];
 $CRON_THREAD=$_POST['CRON_THREAD'];
 
+if ( !isset($CRON_IMP) ) {
+		$CRON_IMP="disable"
+}
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
 switch ($_POST['cmd']) {
