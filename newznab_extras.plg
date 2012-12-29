@@ -373,15 +373,15 @@ $settings = array(
 
 parse_str($argv[1],$_POST);
 
-$CRON_STATUS=$_POST['c_enable'];
-$CRON_BASE=$_POST['c_nndir'];
-$CRON_FILE=$_POST['c_ctab'];
-$CRON_INT=$_POST['c_cint'];
-$CRON_OINT=$_POST['c_oint'];
-$CRON_IMP=$_POST['c_imp'];
-$CRON_IMPDIR=$_POST['c_impdir'];
-$CRON_PP=$_POST['c_pp'];
-$CRON_THREAD=$_POST['c_thread'];
+$CRON_STATUS=$_POST['CRON_STATUS'];
+$CRON_BASE=$_POST['CRON_BASE'];
+$CRON_FILE=$_POST['CRON_FILE'];
+$CRON_INT=$_POST['CRON_INT'];
+$CRON_OINT=$_POST['CRON_OINT'];
+$CRON_IMP=$_POST['CRON_IMP'];
+$CRON_IMPDIR=$_POST['CRON_IMPDIR'];
+$CRON_PP=$_POST['CRON_PP'];
+$CRON_THREAD=$_POST['CRON_THREAD'];
 
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
@@ -518,44 +518,44 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 			<table class="settings">
 	 			<tr>
 					<td>Enable Cron:</td>
-	       			<td><select name="c_enable" size="1">
+	       			<td><select name="CRON_STATUS" size="1">
 					<?=mk_option($newznab_cron_cfg['CRON_STATUS'], "disable", "No");?>
 					<?=mk_option($newznab_cron_cfg['CRON_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="c_nndir" maxlength="60" value="<?=$newznab_cron_cfg['CRON_BASE'];?>"></td>
+					<td><input type="text" name="CRON_BASE" maxlength="60" value="<?=$newznab_cron_cfg['CRON_BASE'];?>"></td>
 				</tr>
 				<tr>
 					<td>Crontab file:</td>
-					<td><input type="text" name="c_ctab" maxlength="60" value="<?=$newznab_cron_cfg['CRON_FILE'];?>"></td>
+					<td><input type="text" name="CRON_FILE" maxlength="60" value="<?=$newznab_cron_cfg['CRON_FILE'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Cron Interval (1-60 minutes):</td>
-					<td><input type="text" name="c_cint" maxlength="2" value="<?=$newznab_cron_cfg['CRON_INT'];?>"></td>
+					<td><input type="text" name="CRON_INT" maxlength="2" value="<?=$newznab_cron_cfg['CRON_INT'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Opt Seconds:</td>
-					<td><input type="text" name="c_oint" maxlength="6" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
+					<td><input type="text" name="CRON_OINT" maxlength="6" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
 				</tr>
 				<tr>
 					<td>Data directory:</td>
 					<td>
-						<input type="checkbox" name="c_imp" <?=($newznab_cron_cfg['CRON_IMPDIR'])?"checked=\"checked\"":"";?> onChange="checkDATADIR(this.form);">
-						<input type="text" name="c_impdir" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>">
+						<input type="checkbox" name="CRON_IMP" <?=($newznab_cron_cfg['CRON_IMPDIR'])?"checked=\"checked\"":"";?> onChange="checkDATADIR(this.form);">
+						<input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>">
 					</td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
-	       			<td><select name="c_pp" size="1">
+	       			<td><select name="CRON_PP" size="1">
 					<?=mk_option($newznab_cron_cfg['CRON_PP'], "disable", "No");?>
 					<?=mk_option($newznab_cron_cfg['CRON_PP'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 	 			<tr>
 					<td>Threaded update_binaries.php:</td>
-	       			<td><select name="c_thread" size="1">
+	       			<td><select name="CRON_THREAD" size="1">
 					<?=mk_option($newznab_cron_cfg['CRON_THREAD'], "disable", "No");?>
 					<?=mk_option($newznab_cron_cfg['CRON_THREAD'], "enable", "Yes");?>
 					</select></td>
