@@ -491,7 +491,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 	 			<tr>
 					<td>Import Directory:</td>
-					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>" onclick="validate_newznab_cron()"></td>
+					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
@@ -508,7 +508,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 					</select></td>
 				</tr>
 					<td></td>
-					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();" onSubmit="validate()">Done</b$
+					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();" onSubmit="validate_newznab_cron()">Done</b$
 				</tr>
 			</table>
 		</form>
