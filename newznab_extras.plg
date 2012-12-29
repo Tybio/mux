@@ -383,7 +383,7 @@ $CRON_IMPDIR=$_POST['CRON_IMPDIR'];
 $CRON_PP=$_POST['CRON_PP'];
 $CRON_THREAD=$_POST['CRON_THREAD'];
 
-if ( $CRON_IMP != "on") ) {
+if ( $CRON_IMP != "on") {
 	$CRON_IMP="disable";
 }
 
