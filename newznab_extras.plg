@@ -348,7 +348,7 @@ Type="php"
 <INLINE>
 <![CDATA[
 <?PHP
-$logfile = "/var/log/plugins/newznab_extras/update.log";
+$logfile = "/var/log/plugins/newznab_update.log";
 $configfile = "/boot/config/plugins/newznab_extras/newznab_extras.cfg";
 
 if (empty($_SERVER['SHELL']))
