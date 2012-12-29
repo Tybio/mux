@@ -357,27 +357,6 @@ $searchd_running = shell_exec ( "/etc/rc.d/rc.searchd status_check" );
 $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
 $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 
-# Set some Default values
-if( empty($newznab_cron_cfg['CRON_IMPDIR']) ) {
-	$newznab_cron_cfg['CRON_IMPDIR'] = "UNSET"
-}
-if( empty($newznab_cron_cfg['CRON_BASE']) ) {
-	$newznab_cron_cfg['CRON_BASE'] = "UNSET"
-}
-if( empty($newznab_cron_cfg['CRON_INT']) ) {
-	$newznab_cron_cfg['CRON_INT'] = "UNSET"
-}
-if( empty($newznab_cron_cfg['CRON_FILE']) ) {
-	$newznab_cron_cfg['CRON_FILE'] = "UNSET"
-}
-if( empty($newznab_cron_cfg['CRON_OINT']) ) {
-	$newznab_cron_cfg['CRON_OINT'] = "UNSET"
-}
-if ( empty($searchd_cfg['SEARCHD_BASE']) ) {
-	$searchd_cfg['SEARCHD_BASE'] = "UNSET"
-}
-
-
 ?>
 <script type="text/javascript">
 	function show(obj) {
@@ -388,6 +367,26 @@ if ( empty($searchd_cfg['SEARCHD_BASE']) ) {
 			if(no>0)
 				document.getElementById('myDiv'+no).style.display = 'block';
 			}
+	function validate(){
+			if (sphinxsearch_settings.arg2.value == "") {
+				sphinxsearch_settings.arg2.value = "UNSET";
+			}
+			if (cron_settings.arg2.value == "") {
+				cron_settings.arg2.value = "UNSET";
+			}
+			if (cron_settings.arg3.value == "") {
+				cron_settings.arg3.value = "UNSET";
+			}
+			if (cron_settings.arg4.value == "") {
+				cron_settings.arg4.value = "UNSET";
+			}
+			if (cron_settings.arg5.value == "") {
+				cron_settings.arg5.value = "UNSET";
+			}
+			if (cron_settings.arg7.value == "") {
+				cron_settings.arg7.value = "UNSET";
+			}
+	}
 </script>
 <div>
 	<div id="title">
@@ -487,7 +486,7 @@ if ( empty($searchd_cfg['SEARCHD_BASE']) ) {
 				</tr>
 	 			<tr>
 					<td>Import Directory:</td>
-					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
+					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>" onclick="validate(this.value)"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
@@ -504,7 +503,7 @@ if ( empty($searchd_cfg['SEARCHD_BASE']) ) {
 					</select></td>
 				</tr>
 					<td></td>
-					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
+					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();" onSubmit="validate()">Done</b$
 				</tr>
 			</table>
 		</form>
