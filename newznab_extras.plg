@@ -357,7 +357,7 @@ else
 	$newline = "\n";
 
 if (file_exists("$configfile")) {
-	$ini = parse_ini_file($configfile);
+	$ini = parse_ini_file($configfile, true);
 }
 
 $cur_dt = date("F j\, Y h:i:s A");
