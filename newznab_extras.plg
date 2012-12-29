@@ -360,23 +360,6 @@ if (file_exists("$configfile")) {
 	$ini = parse_ini_file($configfile);
 }
 
-$cron_settings = array(
-	"CRON_STATUS",
-	"CRON_BASE",
-	"CRON_FILE",
-	"CRON_INT",
-	"CRON_OINT",
-	"CRON_IMP",
-	"CRON_IMPDIR",
-	"CRON_PP",
-	"CRON_THREAD",
-);
-
-$searchd_settings = array(
-	"SEARCHD_STATUS",
-	"SEARCHD_BASE",
-);
-
 $cur_dt = date("F j\, Y h:i:s A");
 
 parse_str($argv[1],$_POST);
@@ -401,7 +384,7 @@ switch ($_POST['cmd']) {
 #		}
 #		else
 #		stop();
-	case 'apply_searchd';
+	case 'apply_searchd':
 
 		$ini["SEARCHD"]["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
 		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
