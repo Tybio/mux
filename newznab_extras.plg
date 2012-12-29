@@ -465,8 +465,8 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				<tr>
 					<td>Data directory:</td>
 					<td>
-						<input type="checkbox" name="use_data" <?=($newznab_cron_cfg['CRON_IMPDIR'])?"checked=\"checked\"":"";?> onChange="checkDATADIR(this.form);">
-						<input type="text" name="arg5" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>">
+						<input type="checkbox" name="arg6" <?=($newznab_cron_cfg['CRON_IMPDIR'])?"checked=\"checked\"":"";?> onChange="checkDATADIR(this.form);">
+						<input type="text" name="arg7" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>">
 					</td>
 				</tr>
 	 			<tr>
