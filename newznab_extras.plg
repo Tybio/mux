@@ -237,14 +237,14 @@ disable() {
 }
 
 change_settings() {
-	CRON_BASE=$1
-	CRON_FILE=$2
-	CRON_INT=$3
-	CRON_OINT=$4
-	CRON_IMP=$5
-	CRON_IMPDIR=$6
-	CRON_PP=$7
-	CRON_THREAD=$8
+	CRON_BASE="$1"
+	CRON_FILE="$2"
+	CRON_INT="$3"
+	CRON_OINT="$4"
+	CRON_IMP="$5"
+	CRON_IMPDIR="$6"
+	CRON_PP="$7"
+	CRON_THREAD="$8"
 }
 
 start() {
