@@ -392,7 +392,7 @@ switch ($_POST['cmd']) {
 		saveconfig($ini, $configfile, TRUE);
 }
 
-function write_ini_file($assoc_arr, $path, $has_sections=FALSE) { 
+function saveconfig($assoc_arr, $path, $has_sections=FALSE) { 
     $content = ""; 
     if ($has_sections) { 
         foreach ($assoc_arr as $key=>$elem) { 
