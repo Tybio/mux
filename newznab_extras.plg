@@ -370,12 +370,12 @@ $cron_settings = array(
 	"CRON_IMPDIR",
 	"CRON_PP",
 	"CRON_THREAD",
-)
+);
 
 $searchd_settings = array(
 	"SEARCHD_STATUS",
 	"SEARCHD_BASE",
-)
+);
 
 $cur_dt = date("F j\, Y h:i:s A");
 
