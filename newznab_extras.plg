@@ -248,7 +248,7 @@ change_settings() {
 
 start() {
 	if [ "$CRON_STATUS" == "disable" ]; then
-		echo "ERROR: Disabled, run /etc/rc.d/rc.searchd enable"
+		echo "ERROR: Disabled, run /etc/rc.d/rc.newznab_cron enable"
 	else
 		[ ! $CRON_INTAB ] && echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
 	fi
