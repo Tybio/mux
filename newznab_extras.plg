@@ -356,65 +356,27 @@ if (empty($_SERVER['SHELL']))
 else
 	$newline = "\n";
 
+$ini = parse_ini_file($configfile);
+
 $cur_dt = date("F j\, Y h:i:s A");
 write_log("\nStart: $cur_dt");
 
-
-$settings = array(
-	"CRON_STATUS",
-	"CRON_BASE",
-	"CRON_FILE",
-	"CRON_INT",
-	"CRON_OINT",
-	"CRON_IMP",
-	"CRON_IMPDIR",
-	"CRON_PP",
-	"CRON_THREAD",
-);
-
 parse_str($argv[1],$_POST);
-
-$CRON_STATUS=$_POST['CRON_STATUS'];
-$CRON_BASE=$_POST['CRON_BASE'];
-$CRON_FILE=$_POST['CRON_FILE'];
-$CRON_INT=$_POST['CRON_INT'];
-$CRON_OINT=$_POST['CRON_OINT'];
-$CRON_IMP=$_POST['CRON_IMP'];
-$CRON_IMPDIR=$_POST['CRON_IMPDIR'];
-$CRON_PP=$_POST['CRON_PP'];
-$CRON_THREAD=$_POST['CRON_THREAD'];
-
-write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
 switch ($_POST['cmd']) {
 	case 'apply_cron':
-		$settings = array(
-			"CRON_STATUS",
-			"CRON_BASE",
-			"CRON_FILE",
-			"CRON_INT",
-			"CRON_OINT",
-			"CRON_IMP",
-			"CRON_IMPDIR",
-			"CRON_PP",
-			"CRON_THREAD",
-		);
 
-		parse_str($argv[1],$_POST);
+		$ini["CRON"]["STATUS"]=$_POST['CRON_STATUS'];
+		$ini["CRON"]["BASE"]=$_POST['CRON_BASE'];
+		$ini["CRON"]["FILE"]=$_POST['CRON_FILE'];
+		$ini["CRON"]["INT"]=$_POST['CRON_INT'];
+		$ini["CRON"]["OINT"]=$_POST['CRON_OINT'];
+		$ini["CRON"]["IMP"]=$_POST['CRON_IMP'];
+		$ini["CRON"]["IMPDIR"]=$_POST['CRON_IMPDIR'];
+		$ini["CRON"]["PP"]=$_POST['CRON_PP'];
+		$ini["CRON"]["THREAD"]=$_POST['CRON_THREAD'];
 
-		$CRON_STATUS=$_POST['CRON_STATUS'];
-		$CRON_BASE=$_POST['CRON_BASE'];
-		$CRON_FILE=$_POST['CRON_FILE'];
-		$CRON_INT=$_POST['CRON_INT'];
-		$CRON_OINT=$_POST['CRON_OINT'];
-		$CRON_IMP=$_POST['CRON_IMP'];
-		$CRON_IMPDIR=$_POST['CRON_IMPDIR'];
-		$CRON_PP=$_POST['CRON_PP'];
-		$CRON_THREAD=$_POST['CRON_THREAD'];
-
-		write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
-
-		saveconfig();
+		saveconfig($ini, $configfile, TRUE);
 #		if ($SERVICE == "enable") {
 #			applyconfig();
 #			start();
@@ -422,32 +384,11 @@ switch ($_POST['cmd']) {
 #		else
 #		stop();
 	case 'apply_searchd';
-		$settings = array(
-			"SEARCHD_STATUS",
-			"SEARCHD_BASE",
-		};
 
-		parse_str($argv[1],$_POST);
+		$ini["SEARCHD"]["STATUS"]=$_POST['SEARCHD_STATUS'];
+		$ini["SEARCHD"]["BASE"]=$_POST['SEARCHD_BASE'];
 
-		$SEARCHD_STATUS=$_POST['SEARCHD_STATUS'];
-		$SEARCHD_BASE=$_POST['SEARCHD_BASE'];
-
-		write_log("STATUS: $SEARCHD_STATUS\nDir: $SEARCHD_BASE\n);
-
-		saveconfig();
-}
-
-function saveconfig () {
-	echo("Saving Settings...");
-	global $_POST, $configfile, $settings, $newline;
-	$string .= "#newznab_extras configuration\n";
-	foreach ($_POST as $key=>$value) {
-		if (in_array($key, $settings)) {
-			$string .= "$key=\"$value\"\n";
-		}
-	}
-	write_string($configfile, $string, TRUE);
-	echo("Completed$newline ");
+		saveconfig($ini, $configfile, TRUE);
 }
 
 function write_log($contents) {
@@ -455,21 +396,46 @@ function write_log($contents) {
 	write_string($logfile, "$contents\n", FALSE);
 }
 
-function write_string ($file, $contents, $overwrite) {
-	if (file_exists($file)) {
-		if ($overwrite)
-			unlink($file);
-			touch($file);
-		}
-	else {
-		touch($file);
-	}
+function saveconfig($assoc_arr, $path, $has_sections=FALSE) { 
+    $content = ""; 
+    if ($has_sections) { 
+        foreach ($assoc_arr as $key=>$elem) { 
+            $content .= "[".$key."]\n"; 
+            foreach ($elem as $key2=>$elem2) { 
+                if(is_array($elem2)) 
+                { 
+                    for($i=0;$i<count($elem2);$i++) 
+                    { 
+                        $content .= $key2."[] = \"".$elem2[$i]."\"\n"; 
+                    } 
+                } 
+                else if($elem2=="") $content .= $key2." = \n"; 
+                else $content .= $key2." = \"".$elem2."\"\n"; 
+            } 
+        } 
+    } 
+    else { 
+        foreach ($assoc_arr as $key=>$elem) { 
+            if(is_array($elem)) 
+            { 
+                for($i=0;$i<count($elem);$i++) 
+                { 
+                    $content .= $key2."[] = \"".$elem[$i]."\"\n"; 
+                } 
+            } 
+            else if($elem=="") $content .= $key2." = \n"; 
+            else $content .= $key2." = \"".$elem."\"\n"; 
+        } 
+    } 
 
-	$fp = @fopen($file, 'a');
-	@flock($fp, LOCK_EX);
-	@fwrite($fp, $contents);
-	@flock($fp, LOCK_UN);
-	@fclose($fp);
+    if (!$handle = fopen($path, 'w')) { 
+        return false; 
+    } 
+    if (!fwrite($handle, $content)) { 
+        return false; 
+    } 
+    fclose($handle); 
+    return true; 
 }
 ?>
 ]]>
@@ -517,19 +483,19 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 		<div id="title">
 			<span class="left">Configuration:&#32;</span>
 		</div>
-		<form name="sphinxsearch_settings" method="POST" action="/update.htm" target="progressFrame">
-			<input type="hidden" name="cmd" value="/etc/rc.d/rc.searchd">
+		<form name="sphinxsearch_settings" method="POST" action="/plugins/newznab_extras/update.php" target="progressFrame">
+			<input type="hidden" name="cmd" value="apply_searchd">
 			<table class="settings">
 				<tr>
 					<td>Enable:</td>
-	       			<td><select name="arg1" size="1">
+	       			<td><select name="SEARCHD_STATUS" size="1">
 					<?=mk_option($searchd_cfg['SEARCHD_STATUS'], "disable", "No");?>
 					<?=mk_option($searchd_cfg['SEARCHD_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="arg2" maxlength="40" value="<?=$searchd_cfg['SEARCHD_BASE'];?>"></td>
+					<td><input type="text" name="SEARCHD_STATUS" maxlength="40" value="<?=$searchd_cfg['SEARCHD_BASE'];?>"></td>
 				</tr>
 					<td></td>
 					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
