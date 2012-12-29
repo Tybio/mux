@@ -359,6 +359,7 @@ else
 $cur_dt = date("F j\, Y h:i:s A");
 write_log("\nStart: $cur_dt");
 
+
 $settings = array(
 	"CRON_STATUS",
 	"CRON_BASE",
@@ -386,7 +387,33 @@ $CRON_THREAD=$_POST['CRON_THREAD'];
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
 switch ($_POST['cmd']) {
-	case 'apply':
+	case 'apply_cron':
+		$settings = array(
+			"CRON_STATUS",
+			"CRON_BASE",
+			"CRON_FILE",
+			"CRON_INT",
+			"CRON_OINT",
+			"CRON_IMP",
+			"CRON_IMPDIR",
+			"CRON_PP",
+			"CRON_THREAD",
+		);
+
+		parse_str($argv[1],$_POST);
+
+		$CRON_STATUS=$_POST['CRON_STATUS'];
+		$CRON_BASE=$_POST['CRON_BASE'];
+		$CRON_FILE=$_POST['CRON_FILE'];
+		$CRON_INT=$_POST['CRON_INT'];
+		$CRON_OINT=$_POST['CRON_OINT'];
+		$CRON_IMP=$_POST['CRON_IMP'];
+		$CRON_IMPDIR=$_POST['CRON_IMPDIR'];
+		$CRON_PP=$_POST['CRON_PP'];
+		$CRON_THREAD=$_POST['CRON_THREAD'];
+
+		write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
+
 		saveconfig();
 #		if ($SERVICE == "enable") {
 #			applyconfig();
@@ -394,6 +421,20 @@ switch ($_POST['cmd']) {
 #		}
 #		else
 #		stop();
+	case 'apply_searchd';
+		$settings = array(
+			"SEARCHD_STATUS",
+			"SEARCHD_BASE",
+		};
+
+		parse_str($argv[1],$_POST);
+
+		$SEARCHD_STATUS=$_POST['SEARCHD_STATUS'];
+		$SEARCHD_BASE=$_POST['SEARCHD_BASE'];
+
+		write_log("STATUS: $SEARCHD_STATUS\nDir: $SEARCHD_BASE\n);
+
+		saveconfig();
 }
 
 function saveconfig () {
@@ -514,7 +555,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 			<span class="left">Configuration:&#32;</span>
 		</div>
 		<form name="cron_settings" method="POST" action="/plugins/newznab_extras/update.php" target="progressFrame">
-			<input type="hidden" name="cmd" value="apply">
+			<input type="hidden" name="cmd" value="apply_cron">
 			<table class="settings">
 	 			<tr>
 					<td>Enable Cron:</td>
