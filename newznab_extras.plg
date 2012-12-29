@@ -375,7 +375,7 @@ switch ($_POST['cmd']) {
 		$ini["CRON"]["PP"]=$_POST['CRON_PP'];
 		$ini["CRON"]["THREAD"]=$_POST['CRON_THREAD'];
 
-		saveconfig($ini, $configfile, TRUE);
+		saveconfig($ini, $configfile);
 #		if ($SERVICE == "enable") {
 #			applyconfig();
 #			start();
@@ -387,7 +387,7 @@ switch ($_POST['cmd']) {
 		$ini["SEARCHD"]["STATUS"]=$_POST['SEARCHD_STATUS'];
 		$ini["SEARCHD"]["BASE"]=$_POST['SEARCHD_BASE'];
 
-		saveconfig($ini, $configfile, TRUE);
+		saveconfig($ini, $configfile);
 }
 
 function saveconfig($assoc_arr, $path, $has_sections=FALSE) { 
