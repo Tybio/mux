@@ -394,11 +394,11 @@ switch ($_POST['cmd']) {
 }
 
 function start($srv) {
-	echo shell_exec("/etc/rc.d/rc.$srv start")
+	echo shell_exec("/etc/rc.d/rc.$srv start");
 }
 
 function stop($srv) {
-	echo shell_exec("/etc/rc.d/rc.$srv stop")
+	echo shell_exec("/etc/rc.d/rc.$srv stop");
 }
 
 function saveconfig($assoc_arr, $path, $has_sections=FALSE) { 
