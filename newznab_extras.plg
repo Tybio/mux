@@ -408,6 +408,11 @@ function saveconfig () {
 	write_string($configfile, $string, TRUE);
 	echo("Completed$newline ");
 }
+
+function write_log($contents) {
+	global $logfile;
+	write_string($logfile, "$contents\n", FALSE);
+}
 ?>
 ]]>
 </INLINE>
