@@ -71,7 +71,7 @@ rm /tmp/newznab_extras-cleanup
 <![CDATA[
 # searchd configuration
 SEARCHD_STATUS="disable"
-SEARCHD_BASE=""
+SEARCHD_BASE="/usr/local/newznab"
 ]]>
 </INLINE>
 </FILE>
@@ -193,12 +193,12 @@ esac
 <![CDATA[
 # searchd configuration
 CRON_STATUS="disable"
-CRON_BASE="UNSET"
+CRON_BASE="/usr/local/newznab"
 CRON_FILE="/var/spool/cron/crontabs/root"
 CRON_INT="10"
 CRON_OINT="43200"
 CRON_IMP="disable"
-CRON_IMPDIR="UNSET"
+CRON_IMPDIR="/usr/local/newznab/import"
 CRON_PP="disable"
 CRON_THREAD="disable"
 ]]>
@@ -372,26 +372,6 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 			sphinxsearch_settings.arg2.value = "UNSET";
 		}
 	}
-	function validate_newznab_cron(){
-		if (sphinxsearch_settings.arg2.value == "") {
-			sphinxsearch_settings.arg2.value = "UNSET";
-		}
-		if (cron_settings.arg2.value == "") {
-			cron_settings.arg2.value = "UNSET";
-		}
-		if (cron_settings.arg3.value == "") {
-			cron_settings.arg3.value = "UNSET";
-		}
-		if (cron_settings.arg4.value == "") {
-			cron_settings.arg4.value = "UNSET";
-		}
-		if (cron_settings.arg5.value == "") {
-			cron_settings.arg5.value = "UNSET";
-		}
-		if (cron_settings.arg7.value == "") {
-			cron_settings.arg7.value = "UNSET";
-		}
-	}
 </script>
 <div>
 	<div id="title">
@@ -482,16 +462,12 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 					<td>Opt Seconds:</td>
 					<td><input type="text" name="arg5" maxlength="6" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
 				</tr>
-	 			<tr>
-					<td>Import NZBs:</td>
-	       			<td><select name="arg6" size="1">
-					<?=mk_option($newznab_cron_cfg['CRON_IMP'], "disable", "No");?>
-					<?=mk_option($newznab_cron_cfg['CRON_IMP'], "enable", "Yes");?>
-					</select></td>
-				</tr>
-	 			<tr>
-					<td>Import Directory:</td>
-					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
+				<tr>
+					<td>Data directory:</td>
+					<td>
+						<input type="checkbox" name="use_data" <?=($newznab_cron_cfg['CRON_IMPDIR'])?"checked=\"checked\"":"";?> onChange="checkDATADIR(this.form);">
+						<input type="text" name="arg5" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>">
+					</td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
@@ -514,6 +490,34 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 		</form>
 	</div>
 </div>
+<script type="text/javascript">
+	function show(obj) {
+		no = obj.options[obj.selectedIndex].value;
+		count = obj.options.length;
+		for(i=1;i<count;i++)
+			document.getElementById('myDiv'+i).style.display = 'none';
+			if(no>0)
+				document.getElementById('myDiv'+no).style.display = 'block';
+			}
+	function validate_searchd() {
+		if (sphinxsearch_settings.arg2.value == "") {
+			sphinxsearch_settings.arg2.value = "UNSET";
+		}
+	}
+function checkDATADIR(form)
+{
+        if (form.use_data.checked == false )
+        {
+                form.arg5.value = form.arg4.value;
+                form.arg5.type = "hidden";
+        }
+        else
+        {
+                form.arg5.value = "<?=$newznab_cron_cfg['CRON_IMPDIR'];?>";
+                form.arg5.type = "text";
+        }
+}
+</script>
 ]]>
 </INLINE>
 </FILE>
