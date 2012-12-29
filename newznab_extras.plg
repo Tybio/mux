@@ -193,12 +193,12 @@ esac
 <![CDATA[
 # searchd configuration
 CRON_STATUS="disable"
-CRON_BASE=""
+CRON_BASE="UNSET"
 CRON_FILE="/var/spool/cron/crontabs/root"
 CRON_INT="10"
 CRON_OINT="43200"
 CRON_IMP="disable"
-CRON_IMPDIR=""
+CRON_IMPDIR="UNSET"
 CRON_PP="disable"
 CRON_THREAD="disable"
 ]]>
@@ -356,6 +356,12 @@ $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | 
 $searchd_running = shell_exec ( "/etc/rc.d/rc.searchd status_check" );
 $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
 $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
+
+# Set some Default values
+if($searchd_cfg['SEARCHD_BASE'] !== '') {$searchd_cfg['SEARCHD_BASE']="UNSET";}
+if($newznab_cron_cfg['CRON_BASE'] !== '') {$newznab_cron_cfg['CRON_BASE']="UNSET";}
+if($newznab_cron_cfg['CRON_IMPDIR'] !=='') {$newznab_cron_cfg['CRON_IMPDIR']="UNSET";}
+	
 ?>
 <script type="text/javascript">
 	function show(obj) {
