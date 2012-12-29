@@ -358,21 +358,6 @@ $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
 $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 
 ?>
-<script type="text/javascript">
-	function show(obj) {
-		no = obj.options[obj.selectedIndex].value;
-		count = obj.options.length;
-		for(i=1;i<count;i++)
-			document.getElementById('myDiv'+i).style.display = 'none';
-			if(no>0)
-				document.getElementById('myDiv'+no).style.display = 'block';
-			}
-	function validate_searchd() {
-		if (sphinxsearch_settings.arg2.value == "") {
-			sphinxsearch_settings.arg2.value = "UNSET";
-		}
-	}
-</script>
 <div>
 	<div id="title">
 		<span class="left">Configure:&#32;&emsp;</span>
@@ -499,24 +484,19 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 			if(no>0)
 				document.getElementById('myDiv'+no).style.display = 'block';
 			}
-	function validate_searchd() {
-		if (sphinxsearch_settings.arg2.value == "") {
-			sphinxsearch_settings.arg2.value = "UNSET";
-		}
-	}
-function checkDATADIR(form)
-{
-        if (form.use_data.checked == false )
+	function checkDATADIR(form)
+	{
+        if (form.arg6.checked == false )
         {
-                form.arg5.value = form.arg4.value;
-                form.arg5.type = "hidden";
+                form.arg7.value = form.arg4.value;
+                form.arg7.type = "hidden";
         }
         else
         {
-                form.arg5.value = "<?=$newznab_cron_cfg['CRON_IMPDIR'];?>";
-                form.arg5.type = "text";
+                form.arg7.value = "<?=$newznab_cron_cfg['CRON_IMPDIR'];?>";
+                form.arg7.type = "text";
         }
-}
+	}
 </script>
 ]]>
 </INLINE>
