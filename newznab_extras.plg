@@ -377,19 +377,21 @@ switch ($_POST['cmd']) {
 		$ini["CRON"]["CRON_PP"]=$_POST['CRON_PP'];
 		$ini["CRON"]["CRON_THREAD"]=$_POST['CRON_THREAD'];
 		print_r($ini);
-		saveconfig($ini, $configfile);
+		saveconfig($ini, $configfile, TRUE);
 #		if ($SERVICE == "enable") {
 #			applyconfig();
 #			start();
 #		}
 #		else
 #		stop();
+	break;
 	case 'apply_searchd':
 
 		$ini["SEARCHD"]["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
 		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 		print_r($ini);
-		saveconfig($ini, $configfile);
+		saveconfig($ini, $configfile, TRUE);
+	break;
 }
 
 function saveconfig($assoc_arr, $path, $has_sections=FALSE) { 
