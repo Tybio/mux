@@ -384,15 +384,15 @@ parse_str($argv[1],$_POST);
 switch ($_POST['cmd']) {
 	case 'apply_cron':
 
-		$ini["CRON_STATUS"]=$_POST['CRON_STATUS'];
-		$ini["CRON_BASE"]=$_POST['CRON_BASE'];
-		$ini["CRON_FILE"]=$_POST['CRON_FILE'];
-		$ini["CRON_INT"]=$_POST['CRON_INT'];
-		$ini["CRON_OINT"]=$_POST['CRON_OINT'];
-		$ini["CRON_IMP"]=$_POST['CRON_IMP'];
-		$ini["CRON_IMPDIR"]=$_POST['CRON_IMPDIR'];
-		$ini["CRON_PP"]=$_POST['CRON_PP'];
-		$ini["CRON_THREAD"]=$_POST['CRON_THREAD'];
+		$ini["CRON"]["CRON_STATUS"]=$_POST['CRON_STATUS'];
+		$ini["CRON"]["CRON_BASE"]=$_POST['CRON_BASE'];
+		$ini["CRON"]["CRON_FILE"]=$_POST['CRON_FILE'];
+		$ini["CRON"]["CRON_INT"]=$_POST['CRON_INT'];
+		$ini["CRON"]["CRON_OINT"]=$_POST['CRON_OINT'];
+		$ini["CRON"]["CRON_IMP"]=$_POST['CRON_IMP'];
+		$ini["CRON"]["CRON_IMPDIR"]=$_POST['CRON_IMPDIR'];
+		$ini["CRON"]["CRON_PP"]=$_POST['CRON_PP'];
+		$ini["CRON"]["CRON_THREAD"]=$_POST['CRON_THREAD'];
 		print_r($ini);
 		saveconfig($configfile, $ini);
 #		if ($SERVICE == "enable") {
@@ -403,8 +403,8 @@ switch ($_POST['cmd']) {
 #		stop();
 	case 'apply_searchd';
 
-		$ini["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
-		$ini["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
+		$ini["SEARCHD"]["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
+		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 		print_r($ini);
 		saveconfig($configfile, $ini);
 }
@@ -437,8 +437,7 @@ function saveconfig($file, array $options){
 <INLINE>
 <![CDATA[
 <?PHP
-$searchd_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/searchd.cfg");
-$newznab_cron_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_extras.cfg");
+$newznab_extras_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_extras.cfg");
 #$newznab_cfg = parse_ini_file( "/boot/config/plugins/newznab/newznab.cfg" );
 $searchd_cfg = ( file_exists("$NEWZNAB_PATH/db/sphinxdata/sphinx.conf") ) ?"1":"0";
 $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
@@ -485,7 +484,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="SEARCHD_STATUS" maxlength="40" value="<?=$searchd_cfg['SEARCHD_BASE'];?>"></td>
+					<td><input type="text" name="SEARCHD_STATUS" maxlength="40" value="<?=$newznab_cron_cfg['SEARCHD_BASE'];?>"></td>
 				</tr>
 					<td></td>
 					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
@@ -522,19 +521,19 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="CRON_BASE" maxlength="60" value="<?=$newznab_cron_cfg['CRON_BASE'];?>"></td>
+					<td><input type="text" name="CRON_BASE" maxlength="60" value="<?=$newznab_extras_cfg['CRON_BASE'];?>"></td>
 				</tr>
 				<tr>
 					<td>Crontab file:</td>
-					<td><input type="text" name="CRON_FILE" maxlength="60" value="<?=$newznab_cron_cfg['CRON_FILE'];?>"></td>
+					<td><input type="text" name="CRON_FILE" maxlength="60" value="<?=$newznab_extras_cfg['CRON_FILE'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Cron Interval (1-60 minutes):</td>
-					<td><input type="text" name="CRON_INT" maxlength="2" value="<?=$newznab_cron_cfg['CRON_INT'];?>"></td>
+					<td><input type="text" name="CRON_INT" maxlength="2" value="<?=$newznab_extras_cfg['CRON_INT'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Opt Seconds:</td>
-					<td><input type="text" name="CRON_OINT" maxlength="6" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
+					<td><input type="text" name="CRON_OINT" maxlength="6" value="<?=$newznab_extras_cfg['CRON_OINT'];?>"></td>
 				</tr>
 				<tr>
 					<td>Import NZBs:</td>
@@ -545,20 +544,20 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 				<tr>
 					<td>Import directory:</td>
-					<td><input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
+					<td><input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_extras_cfg['CRON_IMPDIR'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
 	       			<td><select name="CRON_PP" size="1">
-					<?=mk_option($newznab_cron_cfg['CRON_PP'], "disable", "No");?>
-					<?=mk_option($newznab_cron_cfg['CRON_PP'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON_PP'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON_PP'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 	 			<tr>
 					<td>Threaded update_binaries.php:</td>
 	       			<td><select name="CRON_THREAD" size="1">
-					<?=mk_option($newznab_cron_cfg['CRON_THREAD'], "disable", "No");?>
-					<?=mk_option($newznab_cron_cfg['CRON_THREAD'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON_THREAD'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON_THREAD'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 					<td></td>
@@ -577,19 +576,6 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 			if(no>0)
 				document.getElementById('myDiv'+no).style.display = 'block';
 			}
-	function checkDATADIR(form)
-	{
-        if (form.arg6.checked == false )
-        {
-                form.arg7.value = form.arg4.value;
-                form.arg7.type = "hidden";
-        }
-        else
-        {
-                form.arg7.value = "<?=$newznab_cron_cfg['CRON_IMPDIR'];?>";
-                form.arg7.type = "text";
-        }
-	}
 </script>
 ]]>
 </INLINE>
