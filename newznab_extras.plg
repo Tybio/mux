@@ -358,7 +358,25 @@ $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
 $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 
 # Set some Default values
-$newznab_cron_cfg['CRON_IMPDIR'] = ( if($newznab_cron_cfg['CRON_IMPDIR'] == '')?"UNSET":$newznab_cron_cfg['CRON_IMPDIR'])
+if( empty($newznab_cron_cfg['CRON_IMPDIR']) ) {
+	$newznab_cron_cfg['CRON_IMPDIR'] = "UNSET"
+}
+if( empty($newznab_cron_cfg['CRON_BASE']) ) {
+	$newznab_cron_cfg['CRON_BASE'] = "UNSET"
+}
+if( empty($newznab_cron_cfg['CRON_INT']) ) {
+	$newznab_cron_cfg['CRON_INT'] = "UNSET"
+}
+if( empty($newznab_cron_cfg['CRON_FILE']) ) {
+	$newznab_cron_cfg['CRON_FILE'] = "UNSET"
+}
+if( empty($newznab_cron_cfg['CRON_OINT']) ) {
+	$newznab_cron_cfg['CRON_OINT'] = "UNSET"
+}
+if ( empty($searchd_cfg['SEARCHD_BASE']) ) {
+	$searchd_cfg['SEARCHD_BASE'] = "UNSET"
+}
+
 
 ?>
 <script type="text/javascript">
