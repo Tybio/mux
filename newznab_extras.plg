@@ -367,25 +367,30 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 			if(no>0)
 				document.getElementById('myDiv'+no).style.display = 'block';
 			}
-	function validate(){
-			if (sphinxsearch_settings.arg2.value == "") {
-				sphinxsearch_settings.arg2.value = "UNSET";
-			}
-			if (cron_settings.arg2.value == "") {
-				cron_settings.arg2.value = "UNSET";
-			}
-			if (cron_settings.arg3.value == "") {
-				cron_settings.arg3.value = "UNSET";
-			}
-			if (cron_settings.arg4.value == "") {
-				cron_settings.arg4.value = "UNSET";
-			}
-			if (cron_settings.arg5.value == "") {
-				cron_settings.arg5.value = "UNSET";
-			}
-			if (cron_settings.arg7.value == "") {
-				cron_settings.arg7.value = "UNSET";
-			}
+	function validate_searchd() {
+		if (sphinxsearch_settings.arg2.value == "") {
+			sphinxsearch_settings.arg2.value = "UNSET";
+		}
+	}
+	function validate_newznab_cron(){
+		if (sphinxsearch_settings.arg2.value == "") {
+			sphinxsearch_settings.arg2.value = "UNSET";
+		}
+		if (cron_settings.arg2.value == "") {
+			cron_settings.arg2.value = "UNSET";
+		}
+		if (cron_settings.arg3.value == "") {
+			cron_settings.arg3.value = "UNSET";
+		}
+		if (cron_settings.arg4.value == "") {
+			cron_settings.arg4.value = "UNSET";
+		}
+		if (cron_settings.arg5.value == "") {
+			cron_settings.arg5.value = "UNSET";
+		}
+		if (cron_settings.arg7.value == "") {
+			cron_settings.arg7.value = "UNSET";
+		}
 	}
 </script>
 <div>
@@ -486,7 +491,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 	 			<tr>
 					<td>Import Directory:</td>
-					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>" onclick="validate(this.value)"></td>
+					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>" onclick="validate_newznab_cron()"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
