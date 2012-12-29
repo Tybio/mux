@@ -413,6 +413,23 @@ function write_log($contents) {
 	global $logfile;
 	write_string($logfile, "$contents\n", FALSE);
 }
+
+function write_string ($file, $contents, $overwrite) {
+	if (file_exists($file)) {
+		if ($overwrite)
+			unlink($file);
+			touch($file);
+		}
+	else {
+		touch($file);
+	}
+
+	$fp = @fopen($file, 'a');
+	@flock($fp, LOCK_EX);
+	@fwrite($fp, $contents);
+	@flock($fp, LOCK_UN);
+	@fclose($fp);
+}
 ?>
 ]]>
 </INLINE>
