@@ -377,7 +377,7 @@ switch ($_POST['cmd']) {
 		$ini["CRON"]["CRON_PP"]=$_POST['CRON_PP'];
 		$ini["CRON"]["CRON_THREAD"]=$_POST['CRON_THREAD'];
 		print_r($ini);
-		saveconfig($configfile, $ini);
+		saveconfig($ini, $configfile, TRUE);
 #		if ($SERVICE == "enable") {
 #			applyconfig();
 #			start();
@@ -389,26 +389,49 @@ switch ($_POST['cmd']) {
 		$ini["SEARCHD"]["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
 		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 		print_r($ini);
-		saveconfig($configfile, $ini);
+		saveconfig($ini, $configfile, TRUE);
 }
 
-function saveconfig($file, array $options){
-    $tmp = '';
-    foreach($options as $section => $values){
-        $tmp .= "[$section]\n";
-        foreach($values as $key => $val){
-            if(is_array($val)){
-                foreach($val as $k =>$v){
-                    $tmp .= "{$key}[$k] = \"$v\"\n";
-                }
-            }
-            else
-                $tmp .= "$key = \"$val\"\n";
-        }
-        $tmp .= "\n";
-    }
-    file_put_contents($file, $tmp);
-    unset($tmp);
+function write_ini_file($assoc_arr, $path, $has_sections=FALSE) { 
+    $content = ""; 
+    if ($has_sections) { 
+        foreach ($assoc_arr as $key=>$elem) { 
+            $content .= "[".$key."]\n"; 
+            foreach ($elem as $key2=>$elem2) { 
+                if(is_array($elem2)) 
+                { 
+                    for($i=0;$i<count($elem2);$i++) 
+                    { 
+                        $content .= $key2."[] = \"".$elem2[$i]."\"\n"; 
+                    } 
+                } 
+                else if($elem2=="") $content .= $key2." = \n"; 
+                else $content .= $key2." = \"".$elem2."\"\n"; 
+            } 
+        } 
+    } 
+    else { 
+        foreach ($assoc_arr as $key=>$elem) { 
+            if(is_array($elem)) 
+            { 
+                for($i=0;$i<count($elem);$i++) 
+                { 
+                    $content .= $key2."[] = \"".$elem[$i]."\"\n"; 
+                } 
+            } 
+            else if($elem=="") $content .= $key2." = \n"; 
+            else $content .= $key2." = \"".$elem."\"\n"; 
+        } 
+    } 
+
+    if (!$handle = fopen($path, 'w')) { 
+        return false; 
+    } 
+    if (!fwrite($handle, $content)) { 
+        return false; 
+    } 
+    fclose($handle); 
+    return true; 
 }
 ?>
 ]]>
