@@ -388,12 +388,12 @@ write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval:
 switch ($_POST['cmd']) {
 	case 'apply':
 		saveconfig();
-		if ($SERVICE == "enable") {
-			applyconfig();
-			start();
-		}
-		else
-		stop();
+#		if ($SERVICE == "enable") {
+#			applyconfig();
+#			start();
+#		}
+#		else
+#		stop();
 }
 
 function saveconfig () {
