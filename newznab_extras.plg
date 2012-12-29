@@ -492,7 +492,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="SEARCHD_STATUS" maxlength="40" value="<?=$newznab_cron_cfg['SEARCHD_BASE'];?>"></td>
+					<td><input type="text" name="SEARCHD_BASE" maxlength="40" value="<?=$newznab_cron_cfg['SEARCHD_BASE'];?>"></td>
 				</tr>
 					<td></td>
 					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
