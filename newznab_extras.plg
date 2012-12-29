@@ -377,7 +377,7 @@ switch ($_POST['cmd']) {
 		$ini["CRON_PP"]=$_POST['CRON_PP'];
 		$ini["CRON_THREAD"]=$_POST['CRON_THREAD'];
 
-		saveconfig($ini, $configfile);
+		saveconfig($configfile, $ini);
 #		if ($SERVICE == "enable") {
 #			applyconfig();
 #			start();
@@ -389,22 +389,26 @@ switch ($_POST['cmd']) {
 		$ini["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
 		$ini["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 
-		saveconfig($ini, $configfile);
+		saveconfig($configfile, $ini);
 }
 
-function saveconfig($array, $file)
-{
-    $res = array();
-    foreach($array as $key => $val)
-    {
-        if(is_array($val))
-        {
-            $res[] = "[$key]";
-            foreach($val as $skey => $sval) $res[] = "$skey = ".(is_numeric($sval) ? $sval : '"'.$sval.'"');
+function saveconfig($file, array $options){
+    $tmp = '';
+    foreach($options as $section => $values){
+        $tmp .= "[$section]\n";
+        foreach($values as $key => $val){
+            if(is_array($val)){
+                foreach($val as $k =>$v){
+                    $tmp .= "{$key}[$k] = \"$v\"\n";
+                }
+            }
+            else
+                $tmp .= "$key = \"$val\"\n";
         }
-        else $res[] = "$key = ".(is_numeric($val) ? $val : '"'.$val.'"');
+        $tmp .= "\n";
     }
-    safefilerewrite($file, implode("\r\n", $res));
+    file_put_contents($file, $tmp);
+    unset($tmp);
 }
 ?>
 ]]>
