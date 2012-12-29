@@ -86,7 +86,7 @@ function log {
 	while read data
 		do
 			echo "[$(date +"%D %T")] $data" >> $LOG_FILE 
-			db "$data"
+			[ $DEBUG ] && echo "$data"
 		done
 	fi
 }
