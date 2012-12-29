@@ -385,16 +385,16 @@ $CRON_THREAD=$_POST['c_thread'];
 
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
-#switch ($_POST['cmd']) {
-#	case 'apply':
-#		saveconfig();
-#		if ($SERVICE == "enable") {
-#			applyconfig();
-#			start();
-#		}
-#		else
-#		stop();
-#}
+switch ($_POST['cmd']) {
+	case 'apply':
+		saveconfig();
+		if ($SERVICE == "enable") {
+			applyconfig();
+			start();
+		}
+		else
+		stop();
+}
 
 function saveconfig () {
 	echo("Saving Settings...");
