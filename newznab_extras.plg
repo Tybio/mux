@@ -276,10 +276,10 @@ status_check() {
 }
 
 write_config() {
-	echo "CRON_STATUS=\"$START_STATUS\"" > /boot/config/plugins/newznab_extras/newznab_cron.cfg
-	echo "CRON_BASE=\"$NEWZNAB_BASE\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
+	echo "CRON_STATUS=\"$CRON_STATUS\"" > /boot/config/plugins/newznab_extras/newznab_cron.cfg
+	echo "CRON_BASE=\"$CRON_BASE\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_FILE=\"$CRON_FILE\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
-	echo "CRON_INT=\"$CRON_INIT\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
+	echo "CRON_INT=\"$CRON_INT\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_OINT=\"$CRON_OINT\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_IMP=\"$CRON_IMP\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	echo "CRON_IMPDIR=\"$CRON_IMPDIR\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
@@ -288,7 +288,7 @@ write_config() {
 	}
 
 source /boot/config/plugins/newznab_extras/newznab_cron.cfg
-if grep -q newznab_cron $CRON_FILE
+if grep -q newznab_cron $CRON_FILE > /dev/null 2>&1
 then
 	CRON_INTAB=1
 fi
