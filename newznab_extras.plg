@@ -356,7 +356,9 @@ if (empty($_SERVER['SHELL']))
 else
 	$newline = "\n";
 
-$ini = parse_ini_file($configfile);
+if (file_exists("$configfile")) {
+	$ini = parse_ini_file($configfile);
+}
 
 $cur_dt = date("F j\, Y h:i:s A");
 
