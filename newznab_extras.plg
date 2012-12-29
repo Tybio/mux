@@ -367,7 +367,7 @@ parse_str($argv[1],$_POST);
 switch ($_POST['cmd']) {
 	case 'apply_cron':
 
-		$ini["CRON_STATUS"]=$_POST['CRON_STATUS'];
+		$ini["TEST"]["CRON_STATUS"]=$_POST['CRON_STATUS'];
 		$ini["CRON_BASE"]=$_POST['CRON_BASE'];
 		$ini["CRON_FILE"]=$_POST['CRON_FILE'];
 		$ini["CRON_INT"]=$_POST['CRON_INT'];
