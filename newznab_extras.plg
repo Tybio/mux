@@ -384,7 +384,8 @@ $CRON_PP=$_POST['CRON_PP'];
 $CRON_THREAD=$_POST['CRON_THREAD'];
 
 if ( !isset($CRON_IMP) ) {
-		$CRON_IMP="disable";
+	$CRON_IMP="disable";
+}
 
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
@@ -444,7 +445,7 @@ function write_string ($file, $contents, $overwrite) {
 <![CDATA[
 <?PHP
 $searchd_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/searchd.cfg");
-$newznab_cron_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_cron.cfg");
+$newznab_cron_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_extras.cfg");
 #$newznab_cfg = parse_ini_file( "/boot/config/plugins/newznab/newznab.cfg" );
 $searchd_cfg = ( file_exists("$NEWZNAB_PATH/db/sphinxdata/sphinx.conf") ) ?"1":"0";
 $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
