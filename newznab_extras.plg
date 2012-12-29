@@ -287,9 +287,9 @@ write_config() {
 	echo "CRON_THREAD=\"$CRON_THREAD\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	}
 
-if [ -f /boot/configs/plugins/newznab_extras/newznab_extras.cfg ]; then
+if [ -f /boot/config/plugins/newznab_extras/newznab_extras.cfg ]; then
 	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
-	grep -v "^\\[" /boot/configs/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
+	grep -v "^\\[" /boot/config/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
 	source /tmp/vars.tmp
 fi
 
