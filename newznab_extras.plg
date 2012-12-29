@@ -225,6 +225,7 @@ enable() {
 check_file() {
 	if [ ! -f /boot/config/plugins/newznab_extras/newznab_cron.sh ]; then
 		wget -N http://raw.github.com/Tybio/mux/master/newznab_extras.plg -O /boot/config/plugins/newznab_extras/newznab_cron.sh --no-check-certificate > /dev/null 2>&1
+		echo "Cron script downloaded"
 	fi
 }
 
@@ -251,6 +252,7 @@ start() {
 		echo "ERROR: Disabled, run /etc/rc.d/rc.newznab_cron enable"
 	else
 		[ ! $CRON_INTAB ] && echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
+		echo "Crontab installed"
 	fi
 }
 
@@ -260,6 +262,8 @@ stop() {
 		crontab /tmp/crontab.tmp
 		# Removed until I can figure out the logic
 		#kill -TERM -$(pgrep -o newznab_cron.sh) 
+	else
+		echo "Crontab not installed"
 	fi
 }
 
@@ -284,7 +288,7 @@ write_config() {
 	}
 
 source /boot/config/plugins/newznab_extras/newznab_cron.cfg
-if grep -Fxq "newznab_cron.sh" "$CRON_FILE"
+if grep -Fxq "newznab_cron.sh" $CRON_FILE
 then
 	CRON_INTAB=1
 fi
@@ -438,19 +442,19 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="arg2" maxlength="40" value="<?=$newznab_cron_cfg['CRON_BASE'];?>"></td>
+					<td><input type="text" name="arg2" maxlength="60" value="<?=$newznab_cron_cfg['CRON_BASE'];?>"></td>
 				</tr>
 				<tr>
 					<td>Crontab file:</td>
-					<td><input type="text" name="arg3" maxlength="40" value="<?=$newznab_cron_cfg['CRON_FILE'];?>"></td>
+					<td><input type="text" name="arg3" maxlength="60" value="<?=$newznab_cron_cfg['CRON_FILE'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Cron Interval (1-60 minutes):</td>
-					<td><input type="text" name="arg4" maxlength="40" value="<?=$newznab_cron_cfg['CRON_INT'];?>"></td>
+					<td><input type="text" name="arg4" maxlength="2" value="<?=$newznab_cron_cfg['CRON_INT'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Opt Seconds:</td>
-					<td><input type="text" name="arg5" maxlength="40" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
+					<td><input type="text" name="arg5" maxlength="6" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Import NZBs:</td>
@@ -461,7 +465,7 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 				</tr>
 	 			<tr>
 					<td>Import Directory:</td>
-					<td><input type="text" name="arg7" maxlength="40" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
+					<td><input type="text" name="arg7" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
