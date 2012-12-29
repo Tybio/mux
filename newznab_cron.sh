@@ -31,10 +31,14 @@
 # Check if there is an unRAID plugin config file
 #
 if [ -f /boot/config/plugins/newznab_extras/newznab_cron.cfg ]; then
-	source /boot/config/plugins/newznab_extras/newznab_cron.cfg
-	NEWZNAB_BASE=CRON_BASE
-	IMPORT_DIR=CRON_IMPDIR
-	OPT_INT=CRON_OINT
+	if [ -f /boot/config/plugins/newznab_extras/newznab_extras.cfg ]; then
+	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+	grep -v "^\\[" /boot/config/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
+	source /tmp/vars.tmp
+	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+	NEWZNAB_BASE=$CRON_BASE
+	IMPORT_DIR=$CRON_IMPDIR
+	OPT_INT=$CRON_OINT
 else
 	#
 	# If running manually, edit these values
