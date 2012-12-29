@@ -365,15 +365,15 @@ parse_str($argv[1],$_POST);
 switch ($_POST['cmd']) {
 	case 'apply_cron':
 
-		$ini["CRON"]["STATUS"]=$_POST['CRON_STATUS'];
-		$ini["CRON"]["BASE"]=$_POST['CRON_BASE'];
-		$ini["CRON"]["FILE"]=$_POST['CRON_FILE'];
-		$ini["CRON"]["INT"]=$_POST['CRON_INT'];
-		$ini["CRON"]["OINT"]=$_POST['CRON_OINT'];
-		$ini["CRON"]["IMP"]=$_POST['CRON_IMP'];
-		$ini["CRON"]["IMPDIR"]=$_POST['CRON_IMPDIR'];
-		$ini["CRON"]["PP"]=$_POST['CRON_PP'];
-		$ini["CRON"]["THREAD"]=$_POST['CRON_THREAD'];
+		$ini["CRON_STATUS"]=$_POST['CRON_STATUS'];
+		$ini["CRON_BASE"]=$_POST['CRON_BASE'];
+		$ini["CRON_FILE"]=$_POST['CRON_FILE'];
+		$ini["CRON_INT"]=$_POST['CRON_INT'];
+		$ini["CRON_OINT"]=$_POST['CRON_OINT'];
+		$ini["CRON_IMP"]=$_POST['CRON_IMP'];
+		$ini["CRON_IMPDIR"]=$_POST['CRON_IMPDIR'];
+		$ini["CRON_PP"]=$_POST['CRON_PP'];
+		$ini["CRON_THREAD"]=$_POST['CRON_THREAD'];
 
 		saveconfig($ini, $configfile);
 #		if ($SERVICE == "enable") {
@@ -384,8 +384,8 @@ switch ($_POST['cmd']) {
 #		stop();
 	case 'apply_searchd';
 
-		$ini["SEARCHD"]["STATUS"]=$_POST['SEARCHD_STATUS'];
-		$ini["SEARCHD"]["BASE"]=$_POST['SEARCHD_BASE'];
+		$ini["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
+		$ini["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 
 		saveconfig($ini, $configfile);
 }
