@@ -288,10 +288,13 @@ write_config() {
 	}
 
 source /boot/config/plugins/newznab_extras/newznab_cron.cfg
-if grep -Fxq "newznab_cron.sh" $CRON_FILE
-then
-	CRON_INTAB=1
-fi
+#if grep -Fxq newznab_cron.sh $CRON_FILE
+#then
+#	CRON_INTAB=1
+#fi
+
+grep -q newznab_cron $CRON_FILE
+[[ !? -eq 0 ]] && CRON_INTAB="1"
 
 case "$1" in
 	'enable')
