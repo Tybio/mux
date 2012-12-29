@@ -287,7 +287,17 @@ write_config() {
 	echo "CRON_THREAD=\"$CRON_THREAD\"" >> /boot/config/plugins/newznab_extras/newznab_cron.cfg
 	}
 
-source /boot/config/plugins/newznab_extras/newznab_cron.cfg
+if [ -f /boot/configs/plugins/newznab_extras/newznab_extras.cfg ]; then
+	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+	grep -v "^\\[" /boot/configs/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
+	source /tmp/vars.tmp
+fi
+
+echo "TEST: $CRON_STATUS"
+echo "TEST: $CRON_BASE"
+
+exit
+
 if grep -q newznab_cron $CRON_FILE > /dev/null 2>&1
 then
 	CRON_INTAB=1
