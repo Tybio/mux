@@ -377,7 +377,7 @@ switch ($_POST['cmd']) {
 		$ini["CRON"]["CRON_PP"]=$_POST['CRON_PP'];
 		$ini["CRON"]["CRON_THREAD"]=$_POST['CRON_THREAD'];
 		print_r($ini);
-		saveconfig($ini, $configfile);
+		saveconfig($ini, $configfile, TRUE);
 #		if ($ini["CRON"]["CRON_STATUS"] == "enable") {
 #			start("newznab_cron");
 #		}
@@ -389,7 +389,7 @@ switch ($_POST['cmd']) {
 		$ini["SEARCHD"]["SEARCHD_STATUS"]=$_POST['SEARCHD_STATUS'];
 		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 		print_r($ini);
-		saveconfig($ini, $configfile);
+		saveconfig($ini, $configfile, TRUE);
 	break;
 }
 
