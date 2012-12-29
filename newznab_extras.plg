@@ -373,15 +373,15 @@ $settings = array(
 
 parse_str($argv[1],$_POST);
 
-$CRON_STATUS=$_POST['CRON_STATUS'];
-$CRON_BASE=$_POST['CRON_BASE'];
-$CRON_FILE=$_POST['CRON_FILE'];
-$CRON_INT=$_POST['CRON_INT'];
-$CRON_OINT=$_POST['CRON_OINT'];
-$CRON_IMP=$_POST['CRON_IMP'];
-$CRON_IMPDIR=$_POST['CRON_IMPDIR'];
-$CRON_PP=$_POST['CRON_PP'];
-$CRON_THREAD=$_POST['CRON_THREAD'];
+$CRON_STATUS=$_POST['c_enable'];
+$CRON_BASE=$_POST['c_nndir'];
+$CRON_FILE=$_POST['c_ctab'];
+$CRON_INT=$_POST['c_cint'];
+$CRON_OINT=$_POST['c_oint'];
+$CRON_IMP=$_POST['c_imp'];
+$CRON_IMPDIR=$_POST['c_impdir'];
+$CRON_PP=$_POST['c_pp'];
+$CRON_THREAD=$_POST['c_thread'];
 
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
