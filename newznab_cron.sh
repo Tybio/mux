@@ -50,9 +50,6 @@ if [ -f /boot/config/plugins/newznab_extras/newznab_cron.cfg ]; then
 		# Interval to run optimization
 		OPT_INT=43200
 		#
-		# Log file
-		LOG_FILE="/var/log/newznab_cron.log"
-		#
 		# Debugging, leave off unless you need it
 		#set -xv
 	fi
@@ -77,6 +74,9 @@ done
 
 [ "$HELP" ] && echo "`basename $0 .sh` [-q|h]"
 [ "$HELP" ] && exit 1
+
+# Log file
+LOG_FILE="/var/log/newznab_cron.log"
 
 function log {
 	# If there are parameters read from parameters
