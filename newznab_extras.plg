@@ -383,10 +383,6 @@ $CRON_IMPDIR=$_POST['CRON_IMPDIR'];
 $CRON_PP=$_POST['CRON_PP'];
 $CRON_THREAD=$_POST['CRON_THREAD'];
 
-if ( $CRON_IMP != "on") {
-	$CRON_IMP="disable";
-}
-
 write_log("STATUS: $CRON_STATUS\nDir: $CRON_BASE\nCrontab: $CRON_FILE\nInterval: $CRON_INT\nOpt Interval: $CRON_OINT\nImport: $CRON_IMP\nImport Dir: $CRON_IMPDIR\nPostprocessing: $CRON_PP\nThread: $CRON_THREAD");
 
 switch ($_POST['cmd']) {
@@ -544,11 +540,15 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 					<td><input type="text" name="CRON_OINT" maxlength="6" value="<?=$newznab_cron_cfg['CRON_OINT'];?>"></td>
 				</tr>
 				<tr>
-					<td>Data directory:</td>
-					<td>
-						<input type="checkbox" name="CRON_IMP" <?=($newznab_cron_cfg['CRON_IMPDIR'])?"checked=\"checked\"":"";?> onChange="checkDATADIR(this.form);">
-						<input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>">
-					</td>
+					<td>Import NZBs:</td>
+	       			<td><select name="CRON_IMP" size="1">
+					<?=mk_option($newznab_cron_cfg['CRON_IMP'], "disable", "No");?>
+					<?=mk_option($newznab_cron_cfg['CRON_IMP'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Import directory:</td>
+					<td><input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_cron_cfg['CRON_IMPDIR'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
