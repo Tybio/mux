@@ -30,31 +30,32 @@
 #
 if [ -f /boot/config/plugins/newznab_extras/newznab_cron.cfg ]; then
 	if [ -f /boot/config/plugins/newznab_extras/newznab_extras.cfg ]; then
-	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
-	grep -v "^\\[" /boot/config/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
-	source /tmp/vars.tmp
-	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
-	NEWZNAB_BASE=$CRON_BASE
-	IMPORT_DIR=$CRON_IMPDIR
-	OPT_INT=$CRON_OINT
-else
-	#
-	# If running manually, edit these values
-	#
-	# Set to the directory where Newznab is installed
-	NEWZNAB_BASE="/mnt/cache/AppData/Newznab"
-	#
-	# Set to the directory where NZBs to import are located
-	IMPORT_DIR="/mnt/cache/AppData/Newznab/tempnzbs"
-	#
-	# Interval to run optimization
-	OPT_INT=43200
-	#
-	# Log file
-	LOG_FILE="/var/log/newznab_cron.log"
-	#
-	# Debugging, leave off unless you need it
-	#set -xv
+		[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+		grep -v "^\\[" /boot/config/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
+		source /tmp/vars.tmp
+		[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+		NEWZNAB_BASE=$CRON_BASE
+		IMPORT_DIR=$CRON_IMPDIR
+		OPT_INT=$CRON_OINT
+	else
+		#
+		# If running manually, edit these values
+		#
+		# Set to the directory where Newznab is installed
+		NEWZNAB_BASE="/mnt/cache/AppData/Newznab"
+		#
+		# Set to the directory where NZBs to import are located
+		IMPORT_DIR="/mnt/cache/AppData/Newznab/tempnzbs"
+		#
+		# Interval to run optimization
+		OPT_INT=43200
+		#
+		# Log file
+		LOG_FILE="/var/log/newznab_cron.log"
+		#
+		# Debugging, leave off unless you need it
+		#set -xv
+	fi
 fi
 
 # Don't edit below here unless you know what you are doing
