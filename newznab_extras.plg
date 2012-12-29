@@ -258,7 +258,8 @@ stop() {
 	if [ ! $CRON_INTAB ]; then
 		sed '/newznab/d' /var/spool/cron/crontabs/root > /tmp/crontab.tmp
 		crontab /tmp/crontab.tmp
-		kill -TERM -$(pgrep -o newznab_cron.sh) 
+		# Removed until I can figure out the logic
+		#kill -TERM -$(pgrep -o newznab_cron.sh) 
 	fi
 }
 
