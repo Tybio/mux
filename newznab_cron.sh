@@ -116,7 +116,7 @@ if [ -e ${LOCKFILE} ]; then
                 echo $$ > ${LOCKFILE}
         fi
 else
-	log echo "INFO: Creating lock file"
+	log "INFO: Creating lock file"
 	echo $$ > ${LOCKFILE}
 fi
 
@@ -127,7 +127,7 @@ if [ $IMP ]; then
 	fi
 fi
 
-log echo "INFO: Setting Variables"
+log "INFO: Setting Variables"
 
 NEWZNAB_PATH="$NEWZNAB_BASE/misc/update_scripts"
 NEWZNAB_LAST_OPT="/tmp/nn-opt-last.txt"
