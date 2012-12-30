@@ -174,11 +174,13 @@ fi
 
 if [ $DOOPT ]; then
 	log "INFO: Starting optimization..."
+	# Need to find a quick check for Inno DBs here so we can skip this.
+	# Leaving it in right now as most DBs are still default
 	log "INFO: Optimizing DB"
 	$PHPBIN ${NEWZNAB_PATH}/optimise_db.php | log
-	log INFO: Getting TV Schedule"
+	log "INFO: Getting TV Schedule"
 	$PHPBIN ${NEWZNAB_PATH}/update_tvschedule.php | log
-	log INFO: Getting Movie Times"
+	log "INFO: Getting Movie Times"
 	$PHPBIN ${NEWZNAB_PATH}/update_theaters.php | log
 	if [ $PP ]; then
 		log "INFO: Updating Release Parsing"
