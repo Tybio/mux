@@ -56,7 +56,7 @@ fi
 # Don't edit below here unless you know what you are doing
 ###################################################################################################
 
-while getopts :qthopi opt
+while getopts :qthopci opt
 do
 	case $opt in
 	v)  echo "`basename $0 .sh`: Newznab cron script by Tybio"
@@ -66,6 +66,7 @@ do
 	h)  HELP=1;;
 	p)  PP=1;;
 	o)  DOOPT=1;;
+	c)	CLEAN=1;;
 	i)  IMP=1;;
 	esac
 done
@@ -186,6 +187,10 @@ if [ $DOOPT ]; then
 		log "INFO: Updating Release Parsing"
 		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_parsing.php | log
 	fi
+	if [ $CLEAN ] {
+		log "INFO: Cleaning up useless releases"
+		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_cleanup.php | log
+	}
 	log "INFO: Setting timestamp"
 	echo "$CURRTIME" > /tmp/nn-opt-last.txt
 fi
