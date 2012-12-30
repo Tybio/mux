@@ -160,12 +160,12 @@ else
 	$PHPBIN ${NEWZNAB_PATH}/update_binaries.php | log
 fi
 
-[ ! "$QUIET" ] && echo "INFO: Updating releases"
-$PHPBIN ${NEWZNAB_PATH}/update_releases.php | log
+log "INFO: Updating releases"
+$PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
 if [ $IMP ]; then
 	IMP_NZB_C=`ls -alh ${IMPORT_DIR} | wc -l`
 	log "INFO: Importing NZBs, $IMP_NZB_C waiting."
-	$PHPBIN ${NEWZNAB_BASE}/www/admin/nzb-importmodified.php ${IMPORT_DIR} true | log
+	$PHPBIN ${NEWZNAB_BASE}/www/admin/nzb-importmodified.php ${IMPORT_DIR} true | log 
 	IMP_NZB_P=`ls -alh ${IMPORT_DIR} | wc -l`
 	log "INFO: Imported NZBs, $IMP_NZB_P left."
 	log "INFO: Updating releases"
@@ -192,5 +192,5 @@ EDATE=`date`
 ETIME=`date +%s`
 RUNTIME=$(($ETIME - $CURRTIME))
 RMIN=$(($RUNTIME/60))
-echo "INFO: Finished at $EDATE, taking $RMIN minutes, exiting." | log
+log "INFO: Finished at $EDATE, taking $RMIN minutes, exiting." | log
 rm $LOCKFILE
