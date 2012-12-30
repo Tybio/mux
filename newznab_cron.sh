@@ -169,7 +169,7 @@ if [ $IMP ]; then
 	IMP_NZB_P=`ls -alh ${IMPORT_DIR} | wc -l`
 	log "INFO: Imported NZBs, $IMP_NZB_P left."
 	log "INFO: Updating releases"
-	$PHPBIN ${NEWZNAB_PATH}/update_releases.php | log
+	$PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
 fi
 
 if [ $DOOPT ]; then
