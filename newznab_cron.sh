@@ -187,10 +187,10 @@ if [ $DOOPT ]; then
 		log "INFO: Updating Release Parsing"
 		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_parsing.php | log
 	fi
-	if [ $CLEAN ] {
+	if [ $CLEAN ]; then
 		log "INFO: Cleaning up useless releases"
 		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_cleanup.php | log
-	}
+	fi
 	log "INFO: Setting timestamp"
 	echo "$CURRTIME" > /tmp/nn-opt-last.txt
 fi
