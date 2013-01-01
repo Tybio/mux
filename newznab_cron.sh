@@ -159,7 +159,7 @@ if [ ! -e $NEWZNAB_LAST_OPT ]; then
 else
 	LASTOPT=$(<$NEWZNAB_LAST_OPT)
 	DIFF=$((CURRTIME - LASTOPT))
-	if [ "$DIFF" -gt $OPT_INT ] || [ "$DIFF" -lt 1 ]; then
+	if [ "$DIFF" -gt $CRON_OINT ] || [ "$DIFF" -lt 1 ]; then
 		DOOPT=1
 		log "INFO: Timer expired, flagging to run Optimization."
 	else
