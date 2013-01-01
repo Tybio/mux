@@ -104,9 +104,6 @@ do
 	esac
 done
 
-[ "$HELP" ] && echo "`basename $0 .sh` [-q|h]"
-[ "$HELP" ] && exit 1
-
 # Log file
 LOG_FILE="/var/log/newznab_cron.log"
 
@@ -140,7 +137,7 @@ trap "rm -f ${LOCKFILE}; exit" INT TERM
 
 # If the lockfile exists, and the process is still running then exit
 if [ -e ${LOCKFILE} ]; then
-	if test `find ${LOCKFILE} -mmin +119`; then
+	if test `find ${LOCKFILE} -mmin +59`; then
 		log "ERROR: $LOCKFILE is stale, removing it and continuing"
 		kill -TERM -`cat ${LOCKFILE}`
 		echo $$ > ${LOCKFILE}
