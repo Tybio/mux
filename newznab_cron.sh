@@ -65,18 +65,15 @@ if [ -f /boot/config/plugins/newznab_extras/newznab_extras.cfg ]; then
 	grep -v "^\\[" /boot/config/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
 	source /tmp/vars.tmp
 	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
-	NEWZNAB_BASE=$CRON_BASE
-	IMPORT_DIR=$CRON_IMPDIR
-	OPT_INT=$CRON_OINT
 else
 	#
 	# If running manually, edit these values
 	#
 	# Set to the directory where Newznab is installed
-	NEWZNAB_BASE="/mnt/cache/AppData/Newznab"
+	CRON_BASE="/mnt/cache/AppData/Newznab"
 	#
 	# Set to the directory where NZBs to import are located
-	IMPORT_DIR="/mnt/cache/AppData/Newznab/tempnzbs"
+	CRON_IMPDIR="/mnt/cache/AppData/Newznab/tempnzbs"
 	#
 	# Interval to run optimization
 	OPT_INT=43200
@@ -94,11 +91,11 @@ do
 	v)  echo "`basename $0 .sh`: Newznab cron script by Tybio"
             exit 0;;
 	q)  QUIET=1;;
-	t)  THREAD=1;;
-	p)  PP=1;;
+	t)  CRON_THREAD=1;;
+	p)  CRON_PP=1;;
 	o)  DOOPT=1;;
-	c)	CLEAN=1;;
-	i)  IMP=1;;
+	c)	CRON_CLEAN=1;;
+	i)  CRON_IMP=1;;
 	?)  echo $shorthelp; exit 2;;
 	h)  echo $shorthelp; exit 2;;
 	esac
@@ -121,14 +118,6 @@ function log {
 		done
 	fi
 }
-#####################
-#
-# Check to see if the config file wants to enable options
-#
-[ "$CRON_THREAD" == "enable" ] && THREAD=1
-[ "$CRON_PP" == "enable" ] && PP=1
-[ "$CRON_IMP" == "enable" ] && IMP=1
-
 
 CURRTIME=`date +%s`
 
@@ -151,15 +140,15 @@ else
 fi
 
 if [ $IMP ]; then
-	if [ ! -d "$IMPORT_DIR" ]; then
-		log "ERROR: $IMPORT_DIR does not exist, create or remove import option"
+	if [ ! -d "$CRON_IMPDIR" ]; then
+		log "ERROR: $CRON_IMPDIR does not exist, create or remove import option"
 		exit 1
 	fi
 fi
 
 log "INFO: Setting Variables"
 
-NEWZNAB_PATH="$NEWZNAB_BASE/misc/update_scripts"
+NEWZNAB_PATH="$CRON_BASE/misc/update_scripts"
 NEWZNAB_LAST_OPT="/tmp/nn-opt-last.txt"
 PHPBIN="/usr/bin/php"
 
@@ -182,7 +171,7 @@ else
 fi
 
 cd ${NEWZNAB_PATH}
-if [ $THREAD ]; then
+if [ $CRON_THREAD ]; then
 	log "INFO: Updating binaries (Threaded)"
 	$PHPBIN ${NEWZNAB_PATH}/update_binaries_threaded.php | log
 else
@@ -192,11 +181,11 @@ fi
 
 log "INFO: Updating releases"
 $PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
-if [ $IMP ]; then
-	IMP_NZB_C=`ls -alh ${IMPORT_DIR} | wc -l`
+if [ $CRON_IMP ]; then
+	IMP_NZB_C=`ls -alh ${CRON_IMPDIR} | wc -l`
 	log "INFO: Importing NZBs, $IMP_NZB_C waiting."
-	$PHPBIN ${NEWZNAB_BASE}/www/admin/nzb-importmodified.php ${IMPORT_DIR} true | log 
-	IMP_NZB_P=`ls -alh ${IMPORT_DIR} | wc -l`
+	$PHPBIN ${CRON_BASE}/www/admin/nzb-importmodified.php ${CRON_IMPDIR} true | log 
+	IMP_NZB_P=`ls -alh ${CRON_IMPDIR} | wc -l`
 	log "INFO: Imported NZBs, $IMP_NZB_P left."
 	log "INFO: Updating releases"
 	$PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
@@ -212,13 +201,13 @@ if [ $DOOPT ]; then
 	$PHPBIN ${NEWZNAB_PATH}/update_tvschedule.php | log
 	log "INFO: Getting Movie Times"
 	$PHPBIN ${NEWZNAB_PATH}/update_theaters.php | log
-	if [ $PP ]; then
+	if [ $CRON_PP ]; then
 		log "INFO: Updating Release Parsing"
-		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_parsing.php | log
+		$PHPBIN ${CRON_BASE}/misc/testing/update_parsing.php | log
 	fi
-	if [ $CLEAN ]; then
+	if [ $CRON_CLEAN ]; then
 		log "INFO: Cleaning up useless releases"
-		$PHPBIN ${NEWZNAB_BASE}/misc/testing/update_cleanup.php | log
+		$PHPBIN ${CRON_BASE}/misc/testing/update_cleanup.php | log
 	fi
 	log "INFO: Setting timestamp"
 	echo "$CURRTIME" > /tmp/nn-opt-last.txt
