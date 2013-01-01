@@ -15,15 +15,47 @@
 #	Enable/Disable nzb-importmodified.php and update_parsing.php
 #
 # Options:
+#  (All credit to overbyrn on the unRAID forums for creating the help section)
 #
-#	-q:	Quiet Mode (Errors only to shell, all other messages to log)
-#	-t:	Use threaded update_binaries
-#       -h:	Help
-#	-v:	Version
-#	-o:	Force Opt to run
-#	-p:	Enable enhanced post-processing
-#	-i:	Run nzb-importmodified.php	
-#
+shorthelp='Usage: '"$(basename "${0}")"' [--help] [-v] [-q] [-t] [-p] [-c] [-o] [-i]'
+longhelp='This script is designed to control the running of serveral Newznab scripts
+helping to protect the database as Newznab does not protect the DB when it runs.
+
+Explanation of the options:
+
+    -v                  version of this script.
+	
+    -q                  Quite Mode.  Errors only to shell, all other messages
+                        are sent to a log file.
+						
+    -t                  Use threaded version of update_binaries.php
+												
+    -p                  Enable additional post-processing script;				
+			update_parsing.php
+			This script updates release names for releases in 
+			"TV > Other" (5050), "Movie > Other" (2020), and 
+			"Other > Misc" (7010) categories.
+			
+    -c                  Enable additional release clean-up script;
+			update_cleanup.php
+			This script removes releases based on a preset list of
+			criteria in the last 24 hours.
+			
+			ATTENTION: as standard, update_cleanup.php is configured
+			to only echo proposed changes.  Script must be edited
+			before changes are made to the database.  See comments in
+			the script for what changes are required.
+			
+    -o                  Force Optimization to run.
+	
+    -i                  Run nzb-importmodified.php'
+	
+# Is the user asking for extensive help?
+if [[ "$*" == *--help* ]]; then
+	echo -e "$shorthelp""\n""$longhelp"
+	exit
+fi
+
 # Configuration
 #
 # Check if there is an unRAID plugin config file
@@ -56,18 +88,19 @@ fi
 # Don't edit below here unless you know what you are doing
 ###################################################################################################
 
-while getopts :qthopci opt
+while getopts :qthopci? opt
 do
 	case $opt in
 	v)  echo "`basename $0 .sh`: Newznab cron script by Tybio"
             exit 0;;
 	q)  QUIET=1;;
 	t)  THREAD=1;;
-	h)  HELP=1;;
 	p)  PP=1;;
 	o)  DOOPT=1;;
 	c)	CLEAN=1;;
 	i)  IMP=1;;
+	?)  echo $shorthelp; exit 2;;
+	h)  echo $shorthelp; exit 2;;
 	esac
 done
 
@@ -107,8 +140,7 @@ trap "rm -f ${LOCKFILE}; exit" INT TERM
 
 # If the lockfile exists, and the process is still running then exit
 if [ -e ${LOCKFILE} ]; then
-        LOCKFILE_AGE=$(find ${LOCKFILE} -mmin +119)
-        if [ -n $LOCKFILE_AGE ];then
+        if test `find ${LOCKFILE} -mmin +119`
                 log "ERROR: $LOCKFILE found, exiting"
                 exit
         else
