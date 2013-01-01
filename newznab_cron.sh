@@ -140,7 +140,7 @@ trap "rm -f ${LOCKFILE}; exit" INT TERM
 
 # If the lockfile exists, and the process is still running then exit
 if [ -e ${LOCKFILE} ]; then
-        if test `find ${LOCKFILE} -mmin +119`
+        if test `find ${LOCKFILE} -mmin +119`; then
                 log "ERROR: $LOCKFILE found, exiting"
                 exit
         else
