@@ -135,7 +135,7 @@ function log {
 
 CURRTIME=`date +%s`
 
-LOCKFILE="/tmp/nn-cron.lock"
+LOCKFILE="/var/run/newznab_cron.pid"
 trap "rm -f ${LOCKFILE}; exit" INT TERM 
 
 # If the lockfile exists, and the process is still running then exit
