@@ -140,14 +140,14 @@ trap "rm -f ${LOCKFILE}; exit" INT TERM
 
 # If the lockfile exists, and the process is still running then exit
 if [ -e ${LOCKFILE} ]; then
-        if test `find ${LOCKFILE} -mmin +119`; then
-                log "ERROR: $LOCKFILE found, exiting"
-                exit
-        else
-                log"ERROR: $LOCKFILE is $LOCKFILE_AGE, removing it and continuing"
-                kill -TERM -`cat ${LOCKFILE}`
-                echo $$ > ${LOCKFILE}
-        fi
+	if test `find ${LOCKFILE} -mmin +119`; then
+		log "ERROR: $LOCKFILE is stale, removing it and continuing"
+		kill -TERM -`cat ${LOCKFILE}`
+		echo $$ > ${LOCKFILE}
+	else
+		log "ERROR: $LOCKFILE found, exiting"
+		exit
+	fi
 else
 	log "INFO: Creating lock file"
 	echo $$ > ${LOCKFILE}
