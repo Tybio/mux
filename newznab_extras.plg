@@ -173,6 +173,7 @@ CRON_IMP = "disable"
 CRON_IMPDIR = 
 CRON_PP = "disable"
 CRON_THREAD = "disable"
+CRON_CLEAN = "disable"
 [SEARCHD]
 SEARCHD_STATUS = "disable"
 SEARCHD_BASE = 
@@ -188,7 +189,7 @@ SEARCHD_BASE =
 
 check_file() {
 	if [ ! -f /boot/config/plugins/newznab_extras/newznab_cron.sh ]; then
-		wget -N http://raw.github.com/Tybio/mux/master/newznab_extras.plg -O /boot/config/plugins/newznab_extras/newznab_cron.sh --no-check-certificate > /dev/null 2>&1
+		wget -N http://raw.github.com/Tybio/mux/master/newznab_cron.sh -O /boot/config/plugins/newznab_extras/newznab_cron.sh --no-check-certificate > /dev/null 2>&1
 		echo "Cron script downloaded"
 	fi
 }
@@ -308,13 +309,14 @@ switch ($_POST['cmd']) {
 		$ini["CRON"]["CRON_IMPDIR"]=$_POST['CRON_IMPDIR'];
 		$ini["CRON"]["CRON_PP"]=$_POST['CRON_PP'];
 		$ini["CRON"]["CRON_THREAD"]=$_POST['CRON_THREAD'];
+		$ini["CRON"]["CRON_CLEAN"]=$_POST['CRON_CLEAN']
 		print_r($ini);
 		saveconfig($ini, $configfile, TRUE);
-#		if ($ini["CRON"]["CRON_STATUS"] == "enable") {
-#			start("newznab_cron");
-#		}
-#		else
-#			stop("newsnab_cron");
+		if ($ini["CRON"]["CRON_STATUS"] == "enable") {
+			start("newznab_cron");
+		} else {
+			stop("newsnab_cron");
+		}
 	break;
 	case 'apply_searchd':
 
@@ -322,6 +324,11 @@ switch ($_POST['cmd']) {
 		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 		print_r($ini);
 		saveconfig($ini, $configfile, TRUE);
+		if ($ini["SEARCHD"]["SEARCHD_STATUS"] == "enable") {
+			start("searchd");
+		} else {
+			stop("searchd");
+		}
 	break;
 }
 
@@ -505,6 +512,13 @@ $cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
 	       			<td><select name="CRON_THREAD" size="1">
 					<?=mk_option($newznab_extras_cfg['CRON_THREAD'], "disable", "No");?>
 					<?=mk_option($newznab_extras_cfg['CRON_THREAD'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Clean binaries (Advanced):</td>
+	       			<td><select name="CRON_CLEAN" size="1">
+					<?=mk_option($newznab_extras_cfg['CRON_CLEAN'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON_CLEAN'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 					<td></td>
