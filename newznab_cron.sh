@@ -17,16 +17,13 @@
 # Options:
 #  (All credit to overbyrn on the unRAID forums for creating the help section)
 #
-shorthelp='Usage: '"$(basename "${0}")"' [--help] [-v] [-q] [-t] [-p] [-c] [-o] [-i]'
+shorthelp='Usage: '"$(basename "${0}")"' [--help] [-v] [-t] [-p] [-c] [-o] [-i]'
 longhelp='This script is designed to control the running of serveral Newznab scripts
 helping to protect the database as Newznab does not protect the DB when it runs.
 
 Explanation of the options:
 
     -v                  version of this script.
-	
-    -q                  Quite Mode.  Errors only to shell, all other messages
-                        are sent to a log file.
 						
     -t                  Use threaded version of update_binaries.php
 												
@@ -90,12 +87,11 @@ do
 	case $opt in
 	v)  echo "`basename $0 .sh`: Newznab cron script by Tybio"
             exit 0;;
-	q)  QUIET=1;;
-	t)  CRON_THREAD=1;;
-	p)  CRON_PP=1;;
-	o)  DOOPT=1;;
-	c)	CRON_CLEAN=1;;
-	i)  CRON_IMP=1;;
+	t)  CRON_THREAD="enable";;
+	p)  CRON_PP="enable";;
+	o)  DOOPT="enable";;
+	c)	CRON_CLEAN="enable";;
+	i)  CRON_IMP="enable";;
 	?)  echo $shorthelp; exit 2;;
 	h)  echo $shorthelp; exit 2;;
 	esac
@@ -155,12 +151,12 @@ PHPBIN="/usr/bin/php"
 if [ ! -e $NEWZNAB_LAST_OPT ]; then
 	log "INFO: $NEWZNAB_LAST_OPT not found, creating."
 	echo "$CURRTIME" > /tmp/nn-opt-last.txt
-	DOOPT=1
+	DOOPT="enable"
 else
 	LASTOPT=$(<$NEWZNAB_LAST_OPT)
 	DIFF=$((CURRTIME - LASTOPT))
 	if [ "$DIFF" -gt $CRON_OINT ] || [ "$DIFF" -lt 1 ]; then
-		DOOPT=1
+		DOOPT="enable"
 		log "INFO: Timer expired, flagging to run Optimization."
 	else
 		NEXTOPT=$((OPT_INT - DIFF))
@@ -191,7 +187,7 @@ if [ $CRON_IMP = "enable" ]; then
 	$PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
 fi
 
-if [ $DOOPT ]; then
+if [ $DOOPT = "enable" ]; then
 	log "INFO: Starting optimization..."
 	# Need to find a quick check for Inno DBs here so we can skip this.
 	# Leaving it in right now as most DBs are still default
