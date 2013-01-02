@@ -81,9 +81,71 @@ CRON_IMPDIR = "/usr/local/newznab/import"
 CRON_PP = "disable"
 CRON_THREAD = "disable"
 CRON_CLEAN = "disable"
+
 [SEARCHD]
 SEARCHD_STATUS = "disable"
 SEARCHD_BASE = "/usr/local/newznab"
+
+[INSTALLER]
+MEDIAINFO_STATUS = "disable"
+HTOP_STATUS = "disable"
+SCREEN_STATUS = "disable"
+]]>
+</INLINE>
+</FILE>
+
+<FILE Name="/etc/rc.d/rc.installer" Mode="0770">
+<INLINE>
+<![CDATA[
+#!/bin/sh
+# Used to install various features/packages.
+
+install_mediainfo() {
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/a/ glibc-solibs-2.11.1-i486-3.txz
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/d/ gcc-4.4.4-i486-1.txz
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/l/ zlib-1.2.3-i486-2.txz
+	add_pkg http://repository.slacky.eu/slackware-13.1/libraries/libzen/0.4.17/ libzen-0.4.17-i486-1sl.txz
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/a/ cxxlibs-6.0.13-i486-2.txz
+	add_pkg http://repository.slacky.eu/slackware-13.1/libraries/libmediainfo/0.7.39/ libmediainfo-0.7.39-i486-1sl.txz
+	add_pkg http://repository.slacky.eu/slackware-13.1/multimedia/mediainfo/0.7.39/ mediainfo-0.7.39-i486-1sl.txz
+}
+
+install_htop() {
+	add_pkg http://repository.slacky.eu/slackware-13.1/hardware/htop/0.8.3/ htop-0.8.3-i486-3sl.txz
+}
+
+install_screen() {
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/a/ aaa_terminfo-5.7-noarch-1.txz
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.37/slackware/a/ utempter-1.1.5-i486-1.txz
+	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/ap/ screen-4.0.3-i486-1.txz
+}
+
+add_pkg() {
+	cd /boot/packages
+	wget -N $1$2 --no-check-certificate
+	upgradepkg --install-new $2 
+}
+
+start() {
+	[ "$MEDIAINFO_STATUS" == "enable" ] && install_mediainfo
+	[ "$HTOP_STATUS" == "enable" ] && install_htop
+	[ "$SCREEN_STATUS" == "enable" ] && install_screen
+}
+
+if [ -f /boot/config/plugins/newznab_extras/newznab_extras.cfg ]; then
+	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+	grep -v "^\\[" /boot/config/plugins/newznab_extras/newznab_extras.cfg | sed -e 's/ = /=/g' > /tmp/vars.tmp
+	source /tmp/vars.tmp
+	[ -f /tmp/vars.tmp ] && rm /tmp/vars.tmp
+fi
+
+case "$1" in
+	'start')
+		start
+	;;
+	*)
+		echo "usage $0 start|install_mediainfo|install_htop|install_screen"
+esac
 ]]>
 </INLINE>
 </FILE>
@@ -382,11 +444,10 @@ function saveconfig($assoc_arr, $path, $has_sections=FALSE) {
 <?PHP
 $newznab_extras_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_extras.cfg");
 #$newznab_cfg = parse_ini_file( "/boot/config/plugins/newznab/newznab.cfg" );
-$searchd_cfg = ( file_exists("$NEWZNAB_PATH/db/sphinxdata/sphinx.conf") ) ?"1":"0";
 $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
 $searchd_running = shell_exec ( "/etc/rc.d/rc.searchd status_check" );
 $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
-$cron_inst = shell_exec ( "/etc/rc.d/rc.newsnab_cron status_check")
+$cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check")
 
 ?>
 <div>
