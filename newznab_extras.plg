@@ -140,6 +140,15 @@ if [ -f /boot/config/plugins/newznab_extras/newznab_extras.cfg ]; then
 fi
 
 case "$1" in
+	'install_htop')
+		install_htop
+	;;
+	'install_mediainfo')
+		install_mediainfo
+	;;
+	'install_screen')
+		install_screen
+	;;
 	'start')
 		start
 	;;
