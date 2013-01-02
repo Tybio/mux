@@ -73,7 +73,7 @@ else
 	CRON_IMPDIR="/mnt/cache/AppData/Newznab/tempnzbs"
 	#
 	# Interval to run optimization
-	OPT_INT=43200
+	CRON_OINT=43200
 	#
 	# Debugging, leave off unless you need it
 	#set -xv
@@ -122,7 +122,7 @@ trap "rm -f ${LOCKFILE}; exit" INT TERM
 
 # If the lockfile exists, and the process is still running then exit
 if [ -e ${LOCKFILE} ]; then
-	if test `find ${LOCKFILE} -mmin +59`; then
+	if test `find ${LOCKFILE} -mmin +119`; then
 		log "ERROR: $LOCKFILE is stale, removing it and continuing"
 		kill -TERM -`cat ${LOCKFILE}`
 		echo $$ > ${LOCKFILE}
