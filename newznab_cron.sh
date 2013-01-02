@@ -100,12 +100,6 @@ done
 # Log file
 LOG_FILE="/var/log/newznab_cron.log"
 
-# Set some default values
-CRON_OINT = "disable"
-CRON_THREAD = "disable"
-CRON_IMP = "disable"
-DOOIT = "0"
-
 function log {
 	# If there are parameters read from parameters
 	if [ $# -gt 0 ]; then
@@ -161,7 +155,7 @@ if [ ! -e $NEWZNAB_LAST_OPT ]; then
 else
 	LASTOPT=$(<$NEWZNAB_LAST_OPT)
 	DIFF=$((CURRTIME - LASTOPT))
-	if [ "$DIFF" -gt $CRON_OINT ] || [ "$DIFF" -lt 1 ]; then
+	if [ "$DIFF" -gt "$CRON_OINT" ] || [ "$DIFF" -lt 1 ]; then
 		DOOPT="enable"
 		log "INFO: Timer expired, flagging to run Optimization."
 	else
@@ -173,7 +167,7 @@ else
 fi
 
 cd ${NEWZNAB_PATH}
-if [ $CRON_THREAD = "enable" ]; then
+if [ "$CRON_THREAD" = "enable" ]; then
 	log "INFO: Updating binaries (Threaded)"
 	$PHPBIN ${NEWZNAB_PATH}/update_binaries_threaded.php | log
 else
@@ -183,7 +177,7 @@ fi
 
 log "INFO: Updating releases"
 $PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
-if [ $CRON_IMP = "enable" ]; then
+if [ "$CRON_IMP" = "enable" ]; then
 	IMP_NZB_C=`ls -alh ${CRON_IMPDIR} | wc -l`
 	log "INFO: Importing NZBs, $IMP_NZB_C waiting."
 	$PHPBIN ${CRON_BASE}/www/admin/nzb-importmodified.php ${CRON_IMPDIR} true | log 
@@ -193,7 +187,7 @@ if [ $CRON_IMP = "enable" ]; then
 	$PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
 fi
 
-if [ $DOOPT = "enable" ]; then
+if [ "$DOOPT" = "enable" ]; then
 	log "INFO: Starting optimization..."
 	# Need to find a quick check for Inno DBs here so we can skip this.
 	# Leaving it in right now as most DBs are still default
@@ -203,11 +197,11 @@ if [ $DOOPT = "enable" ]; then
 	$PHPBIN ${NEWZNAB_PATH}/update_tvschedule.php | log
 	log "INFO: Getting Movie Times"
 	$PHPBIN ${NEWZNAB_PATH}/update_theaters.php | log
-	if [ $CRON_PP = "enable" ]; then
+	if [ "$CRON_PP" = "enable" ]; then
 		log "INFO: Updating Release Parsing"
 		$PHPBIN ${CRON_BASE}/misc/testing/update_parsing.php | log
 	fi
-	if [ $CRON_CLEAN = "enable" ]; then
+	if [ "$CRON_CLEAN" = "enable" ]; then
 		log "INFO: Cleaning up useless releases"
 		$PHPBIN ${CRON_BASE}/misc/testing/update_cleanup.php | log
 	fi
