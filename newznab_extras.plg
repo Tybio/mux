@@ -49,6 +49,7 @@ The distribution of sphinxsearch requires postgres libraries.  When I can rebuil
 [ -d /usr/local/emhttp/plugins/newznab_extras ] && rm -f -R /usr/local/emhttp/plugins/newznab_extras
 [ -f /etc/rc.d/rc.searchd ] && rm -f /etc/rc.d/rc.searchd
 [ -f /etc/rc.d/rc.newznab_cron ] && rm -f /etc/rc.d/rc.newznab_cron
+[ -f /etc/rc.d/rc.installer ] && rm -f /etc/rc.d/rc.installer
 [ -f /boot/config/plugins/newznab_extras/plgver.txt ] && rm -f /boot/config/plugins/newznab_extras/plgver.txt
 [ -f /usr/local/emhttp/plugins/newznab_extras/event/disks_mounted ] && rm -f /usr/local/emhttp/plugins/newznab_extras/event/disks_mounted
 [ -f /usr/local/emhttp/plugins/newznab_extras/event/unmounting_disks ] && rm -f /usr/local/emhttp/plugins/newznab_extras/event/unmounting_disks
@@ -358,6 +359,12 @@ $cur_dt = date("F j\, Y h:i:s A");
 parse_str($argv[1],$_POST);
 
 switch ($_POST['cmd']) {
+	case 'apply_installer'
+		$ini["INSTALLER"]["MEDIAINFO_STATUS"]=$_POST['MEDIAINFO_STATUS'];
+		$ini["INSTALLER"]["HTOP_STATUS"]=$_POST['HTOP_STATUS'];
+		$ini["INSTALLER"]["SCREEN_STATUS"]=$_POST['SCREEN_STATUS'];
+		start("installer");
+	break;
 	case 'apply_cron':
 
 		$ini["CRON"]["CRON_STATUS"]=$_POST['CRON_STATUS'];
@@ -456,7 +463,11 @@ $newznab_extras_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newzn
 $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
 $searchd_running = shell_exec ( "/etc/rc.d/rc.searchd status_check" );
 $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
-$cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check")
+$cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check");
+$mi_inst = file_exists ( "/usr/bin/mediainfo" ) ? "yes" : "no" ;
+$htop_inst = file_exists ( "/usr/bin/htop" ) ? "yes" : "no" ;
+$screen_inst = file_exists ( "/usr/bin/screen" ) ? "yes" : "no" ;
+$searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 
 ?>
 <div>
@@ -464,12 +475,79 @@ $cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check")
 		<span class="left">Configure:&#32;&emsp;</span>
 		<select onchange="show(this)">
 			<option value="0">Chose</option>
-			<option value="1">SphinxSearch</option>
-			<option value="2">NewznabCron</option>
+			<option value="1">Optional Installs</option>
+			<option value="2">SphinxSearch</option>
+			<option value="3">NewznabCron</option>
 		</select>
 	</div>
 </div>
 <div id="myDiv1" style="display: none;">
+	<div style="width: 49%; float:left">
+		<div id="title">
+			<span class="left">Install Status:&#32;</span>
+		</div>
+		<span class="left">Searchd: 
+			<?if($searchd_inst=="yes"):?>		
+				<span class="green"><b>Installed</b></span>
+			<?else:?>
+				<span class="red"><b>Not Installed</b></span>
+			<?endif;?>
+		</span>
+		<span class="left">Mediainfo: 
+			<?if($mediainfo_inst=="yes"):?>		
+				<span class="green"><b>Installed</b></span>
+			<?else:?>
+				<span class="red"><b>Not Installed</b></span>
+			<?endif;?>
+		</span>	
+		<span class="left">htop: 
+			<?if($htop_inst=="yes"):?>		
+				<span class="green"><b>Installed</b></span>
+			<?else:?>
+				<span class="red"><b>Not Installed</b></span>
+			<?endif;?>
+		</span>
+		<span class="left">Screen: 
+			<?if($screen_inst=="yes"):?>		
+				<span class="green"><b>Installed</b></span>
+			<?else:?>
+				<span class="red"><b>Not Installed</b></span>
+			<?endif;?>
+		</span>
+	</div>
+	<div style="width: 49%; float:right">
+		<div id="title">
+			<span class="left">Configuration:&#32;</span>
+		</div>
+		<form name="installer_settings" method="POST" action="/plugins/newznab_extras/update.php" target="progressFrame">
+			<input type="hidden" name="cmd" value="apply_installer">
+			<table class="settings">
+				<tr>
+					<td>Install:</td>
+	       			<td><select name="MEDIAINFO_STATUS" size="1">
+					<?=mk_option($newsnab_extras_cfg['INSTALLER']['MEDIAINFO_STATUS'], "disable", "No");?>
+					<?=mk_option($newsnab_extras_cfg['INSTALLER']['MEDIAINFO_STATUS'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Install:</td>
+	       			<td><select name="HTOP_STATUS" size="1">
+					<?=mk_option($newsnab_extras_cfg['INSTALLER']['HTOP_STATUS'], "disable", "No");?>
+					<?=mk_option($newsnab_extras_cfg['INSTALLER']['HTOP_STATUS'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Install:</td>
+	       			<td><select name="SCREEN_STATUS" size="1">
+					<?=mk_option($newsnab_extras_cfg['INSTALLER']['SCREEN_STATUS'], "disable", "No");?>
+					<?=mk_option($newsnab_extras_cfg['INSTALLER']['SCREEN_STATUS'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>
+<div id="myDiv2" style="display: none;">
 	<div style="width: 49%; float:left">
 		<div id="title">
 			<span class="left">Searchd Status:&#32;
@@ -491,13 +569,13 @@ $cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check")
 				<tr>
 					<td>Enable:</td>
 	       			<td><select name="SEARCHD_STATUS" size="1">
-					<?=mk_option($searchd_cfg['SEARCHD_STATUS'], "disable", "No");?>
-					<?=mk_option($searchd_cfg['SEARCHD_STATUS'], "enable", "Yes");?>
+					<?=mk_option($newsnab_extras_cfg['SEARCHD']['SEARCHD_STATUS'], "disable", "No");?>
+					<?=mk_option($newsnab_extras_cfg['SEARCHD']['SEARCHD_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="SEARCHD_BASE" maxlength="40" value="<?=$newznab_extras_cfg['SEARCHD_BASE'];?>"></td>
+					<td><input type="text" name="SEARCHD_BASE" maxlength="40" value="<?=$newsnab_extras_cfg['SEARCHD']['SEARCHD_BASE'];?>"></td>
 				</tr>
 					<td></td>
 					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
@@ -506,7 +584,7 @@ $cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check")
 		</form>
 	</div>
 </div>
-<div id="myDiv2" style="display: none;">
+<div id="myDiv3" style="display: none;">
 	<div style="width: 49%; float:left">
 		<div id="title">
 			<span class="left">Cron Status:&#32;
@@ -528,56 +606,56 @@ $cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check")
 	 			<tr>
 					<td>Enable Cron:</td>
 	       			<td><select name="CRON_STATUS" size="1">
-					<?=mk_option($newznab_cron_cfg['CRON_STATUS'], "disable", "No");?>
-					<?=mk_option($newznab_cron_cfg['CRON_STATUS'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_STATUS'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="CRON_BASE" maxlength="60" value="<?=$newznab_extras_cfg['CRON_BASE'];?>"></td>
+					<td><input type="text" name="CRON_BASE" maxlength="60" value="<?=$newznab_extras_cfg['CRON']['CRON_BASE'];?>"></td>
 				</tr>
 				<tr>
 					<td>Crontab file:</td>
-					<td><input type="text" name="CRON_FILE" maxlength="60" value="<?=$newznab_extras_cfg['CRON_FILE'];?>"></td>
+					<td><input type="text" name="CRON_FILE" maxlength="60" value="<?=$newznab_extras_cfg['CRON']['CRON_FILE'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Cron Interval (1-60 minutes):</td>
-					<td><input type="text" name="CRON_INT" maxlength="2" value="<?=$newznab_extras_cfg['CRON_INT'];?>"></td>
+					<td><input type="text" name="CRON_INT" maxlength="2" value="<?=$newznab_extras_cfg['CRON']['CRON_INT'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Opt Seconds:</td>
-					<td><input type="text" name="CRON_OINT" maxlength="6" value="<?=$newznab_extras_cfg['CRON_OINT'];?>"></td>
+					<td><input type="text" name="CRON_OINT" maxlength="6" value="<?=$newznab_extras_cfg['CRON']['CRON_OINT'];?>"></td>
 				</tr>
 				<tr>
 					<td>Import NZBs:</td>
 	       			<td><select name="CRON_IMP" size="1">
-					<?=mk_option($newznab_cron_cfg['CRON_IMP'], "disable", "No");?>
-					<?=mk_option($newznab_cron_cfg['CRON_IMP'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_IMP'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_IMP'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Import directory:</td>
-					<td><input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_extras_cfg['CRON_IMPDIR'];?>"></td>
+					<td><input type="text" name="CRON_IMPDIR" style="width:86%" maxlength="60" value="<?=$newznab_extras_cfg['CRON']['CRON_IMPDIR'];?>"></td>
 				</tr>
 	 			<tr>
 					<td>Do Post processing:</td>
 	       			<td><select name="CRON_PP" size="1">
-					<?=mk_option($newznab_extras_cfg['CRON_PP'], "disable", "No");?>
-					<?=mk_option($newznab_extras_cfg['CRON_PP'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_PP'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_PP'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 	 			<tr>
 					<td>Threaded update_binaries.php:</td>
 	       			<td><select name="CRON_THREAD" size="1">
-					<?=mk_option($newznab_extras_cfg['CRON_THREAD'], "disable", "No");?>
-					<?=mk_option($newznab_extras_cfg['CRON_THREAD'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_THREAD'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_THREAD'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Clean binaries (Advanced):</td>
 	       			<td><select name="CRON_CLEAN" size="1">
-					<?=mk_option($newznab_extras_cfg['CRON_CLEAN'], "disable", "No");?>
-					<?=mk_option($newznab_extras_cfg['CRON_CLEAN'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_CLEAN'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['CRON']['CRON_CLEAN'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 					<td></td>
