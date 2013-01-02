@@ -66,12 +66,24 @@ rm /tmp/newznab_extras-cleanup
 </FILE>
 
 <!-- Configuration File -->
-<FILE Name="/boot/config/plugins/newznab_extras/searchd.cfg">
+<FILE Name="/boot/config/plugins/newznab_extras/newznab_extras.cfg">
 <INLINE>
 <![CDATA[
 # searchd configuration
-SEARCHD_STATUS="disable"
-SEARCHD_BASE="/usr/local/newznab"
+[CRON]
+CRON_STATUS = "disable"
+CRON_BASE = "/usr/local/newznab"
+CRON_FILE = "/var/spool/cron/crontabs/root"
+CRON_INT = "10"
+CRON_OINT = "43200"
+CRON_IMP = "disable"
+CRON_IMPDIR = "/usr/local/newznab/import"
+CRON_PP = "disable"
+CRON_THREAD = "disable"
+CRON_CLEAN = "disable"
+[SEARCHD]
+SEARCHD_STATUS = "disable"
+SEARCHD_BASE = "/usr/local/newznab"
 ]]>
 </INLINE>
 </FILE>
@@ -158,29 +170,6 @@ esac
 </INLINE>
 </FILE>
 
-<!-- Configuration File -->
-<FILE Name="/boot/config/plugins/newznab_extras/newznab_cron.cfg">
-<INLINE>
-<![CDATA[
-# searchd configuration
-[CRON]
-CRON_STATUS = "disable"
-CRON_BASE = "/usr/local/newznab"
-CRON_FILE = "/var/spool/cron/crontabs/root"
-CRON_INT = "10"
-CRON_OINT = "43200"
-CRON_IMP = "disable"
-CRON_IMPDIR = 
-CRON_PP = "disable"
-CRON_THREAD = "disable"
-CRON_CLEAN = "disable"
-[SEARCHD]
-SEARCHD_STATUS = "disable"
-SEARCHD_BASE = 
-]]>
-</INLINE>
-</FILE>
-
 <FILE Name="/etc/rc.d/rc.newznab_cron" Mode="0770">
 <INLINE>
 <![CDATA[
@@ -196,7 +185,7 @@ check_file() {
 
 start() {
 	if [ "$CRON_STATUS" == "disable" ]; then
-		echo "ERROR: Disabled, run /etc/rc.d/rc.newznab_cron enable"
+		echo "ERROR: Disabled, enable from plugin page or edit /boot/config/plugins/newznab_extras/newznab_extras.cfg"
 	else
 		check_file
 		[ ! $CRON_INTAB ] && echo "*/$CRON_INT * * * * /boot/config/plugins/newznab_extras/newznab_cron.sh" >> $CRON_FILE
@@ -397,7 +386,7 @@ $searchd_cfg = ( file_exists("$NEWZNAB_PATH/db/sphinxdata/sphinx.conf") ) ?"1":"
 $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
 $searchd_running = shell_exec ( "/etc/rc.d/rc.searchd status_check" );
 $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
-$cron_inst = shell_exec ( "grep -Fxq \"newznab_cron.sh\" \"$CRON_FILE\"")
+$cron_inst = shell_exec ( "/etc/rc.d/rc.newsnab_cron status_check")
 
 ?>
 <div>
