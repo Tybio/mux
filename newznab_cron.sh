@@ -100,6 +100,12 @@ done
 # Log file
 LOG_FILE="/var/log/newznab_cron.log"
 
+# Set some default values
+CRON_OINT = "disable"
+CRON_THREAD = "disable"
+CRON_IMP = "disable"
+DOOIT = "0"
+
 function log {
 	# If there are parameters read from parameters
 	if [ $# -gt 0 ]; then
