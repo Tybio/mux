@@ -1,41 +1,7 @@
 <?xml version='1.0' standalone='yes'?>
 <PLUGIN>
 
-<!-- sphinxsearch file - Tybio - 12/22/2012 -->
-
-<!-- 
-Required plugins
-The distribution of sphinxsearch requires postgres libraries.  When I can rebuild
-       sphinxsearch from source without postgres dependencies this will be removed 
--->
-<FILE Name="/boot/packages/postgresql-8.4.4-i486-1sl.txz" Run="upgradepkg --install-new">
-<URL>http://slackware.org.uk/slacky/slackware-13.1/database/postgresql/8.4.4/postgresql-8.4.4-i486-1sl.txz</URL>
-</FILE>
-
-<!-- Converted Deb package directly from the sphinxsearch site -->
-<FILE Name="/boot/packages/sphinxsearch_2.0.6_i386.tgz" Run="upgradepkg --install-new">
-<URL>http://mux.net/~tybio/plugins/sphinxsearch_2.0.6_i386.tgz</URL>
-</FILE>
-
-<!-- Terminfo package required for Screen -->
-<FILE Name="/boot/packages/aaa_terminfo-5.7-noarch-1.txz" Run="upgradepkg --install-new">
-<URL>http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/a/aaa_terminfo-5.7-noarch-1.txz</URL>
-</FILE>
-
-<!-- uTemper package required for Screen -->
-<FILE Name="/boot/packages/utempter-1.1.5-i486-1.txz" Run="upgradepkg --install-new">
-<URL>http://slackware.cs.utah.edu/pub/slackware/slackware-13.37/slackware/a/utempter-1.1.5-i486-1.txz</URL>
-</FILE>
-
-<!-- Screen package -->
-<FILE Name="/boot/packages/screen-4.0.3-i486-1.txz" Run="upgradepkg --install-new">
-<URL>http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/ap/screen-4.0.3-i486-1.txz</URL>
-</FILE>
-
-<!-- htop package -->
-<FILE Name="/boot/packages/htop-0.8.3-i486-3sl.txz" Run="upgradepkg --install-new">
-<URL>http://repository.slacky.eu/slackware-13.1/hardware/htop/0.8.3/htop-0.8.3-i486-3sl.txz</URL>
-</FILE>
+<!-- newznab_extras plugin - Tybio - 12/22/2012 -->
 
 <!-- Icon -->
 <FILE Name="/boot/config/plugins/newznab_extras/newznab_extras.png">
@@ -121,6 +87,11 @@ install_screen() {
 	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/ap/ screen-4.0.3-i486-1.txz
 }
 
+install_searchd() {
+	add_pkg http://slackware.org.uk/slacky/slackware-13.1/database/postgresql/8.4.4/ postgresql-8.4.4-i486-1sl.txz
+	add_pkg http://mux.net/~tybio/plugins/ sphinxsearch_2.0.6_i386.tgz
+}
+
 add_pkg() {
 	cd /boot/packages
 	wget -N $1$2 --no-check-certificate
@@ -128,6 +99,7 @@ add_pkg() {
 }
 
 start() {
+	[ "$SEARCHD_STATUS" == "enable" ] && install_searchd
 	[ "$MEDIAINFO_STATUS" == "enable" ] && install_mediainfo
 	[ "$HTOP_STATUS" == "enable" ] && install_htop
 	[ "$SCREEN_STATUS" == "enable" ] && install_screen
@@ -150,11 +122,14 @@ case "$1" in
 	'install_screen')
 		install_screen
 	;;
+	'install_searchd')
+		install_searchd
+	;;
 	'start')
 		start
 	;;
 	*)
-		echo "usage $0 start|install_mediainfo|install_htop|install_screen"
+		echo "usage $0 start|install_mediainfo|install_htop|install_screen|install_searchd"
 esac
 ]]>
 </INLINE>
@@ -346,24 +321,29 @@ $logfile = "/var/log/plugins/newznab_update.log";
 $configfile = "/boot/config/plugins/newznab_extras/newznab_extras.cfg";
 
 if (empty($_SERVER['SHELL']))
-	$newline = "<br>";
+        $newline = "<br>";
 else
-	$newline = "\n";
+        $newline = "\n";
 
 if (file_exists("$configfile")) {
-	$ini = parse_ini_file($configfile, true);
+        $ini = parse_ini_file($configfile, true);
 }
 
 $cur_dt = date("F j\, Y h:i:s A");
 
+echo "START: $cur_dt\n";
+
 parse_str($argv[1],$_POST);
 
 switch ($_POST['cmd']) {
-	case 'apply_installer'
-		$ini["INSTALLER"]["MEDIAINFO_STATUS"]=$_POST['MEDIAINFO_STATUS'];
-		$ini["INSTALLER"]["HTOP_STATUS"]=$_POST['HTOP_STATUS'];
-		$ini["INSTALLER"]["SCREEN_STATUS"]=$_POST['SCREEN_STATUS'];
-		start("installer");
+	case 'apply_installer':
+
+		$ini["INSTALLER"]["SEARCHD_INSTALL"]=$_POST['SEARCHD_INSTALL'];
+		$ini["INSTALLER"]["MEDIAINFO_INSTALL"]=$_POST['MEDIAINFO_INSTALL'];
+		$ini["INSTALLER"]["HTOP_INSTALL"]=$_POST['HTOP_INSTALL'];
+		$ini["INSTALLER"]["SCREEN_INSTALL"]=$_POST['SCREEN_INSTALL'];
+		print_r($ini);
+		saveconfig($ini, $configfile, TRU);
 	break;
 	case 'apply_cron':
 
@@ -376,14 +356,13 @@ switch ($_POST['cmd']) {
 		$ini["CRON"]["CRON_IMPDIR"]=$_POST['CRON_IMPDIR'];
 		$ini["CRON"]["CRON_PP"]=$_POST['CRON_PP'];
 		$ini["CRON"]["CRON_THREAD"]=$_POST['CRON_THREAD'];
-		$ini["CRON"]["CRON_CLEAN"]=$_POST['CRON_CLEAN']
 		print_r($ini);
 		saveconfig($ini, $configfile, TRUE);
-		if ($ini["CRON"]["CRON_STATUS"] == "enable") {
-			start("newznab_cron");
-		} else {
-			stop("newsnab_cron");
-		}
+#               if ($ini["CRON"]["CRON_STATUS"] == "enable") {
+#                       start("newznab_cron");
+#               }
+#               else
+#                       stop("newsnab_cron");
 	break;
 	case 'apply_searchd':
 
@@ -391,11 +370,6 @@ switch ($_POST['cmd']) {
 		$ini["SEARCHD"]["SEARCHD_BASE"]=$_POST['SEARCHD_BASE'];
 		print_r($ini);
 		saveconfig($ini, $configfile, TRUE);
-		if ($ini["SEARCHD"]["SEARCHD_STATUS"] == "enable") {
-			start("searchd");
-		} else {
-			stop("searchd");
-		}
 	break;
 }
 
@@ -407,46 +381,46 @@ function stop($srv) {
 	echo shell_exec("/etc/rc.d/rc.$srv stop");
 }
 
-function saveconfig($assoc_arr, $path, $has_sections=FALSE) { 
-    $content = ""; 
-    if ($has_sections) { 
-        foreach ($assoc_arr as $key=>$elem) { 
-            $content .= "[".$key."]\n"; 
-            foreach ($elem as $key2=>$elem2) { 
-                if(is_array($elem2)) 
-                { 
-                    for($i=0;$i<count($elem2);$i++) 
-                    { 
-                        $content .= $key2."[] = \"".$elem2[$i]."\"\n"; 
-                    } 
-                } 
-                else if($elem2=="") $content .= $key2." = \n"; 
-                else $content .= $key2." = \"".$elem2."\"\n"; 
-            } 
-        } 
-    } 
-    else { 
-        foreach ($assoc_arr as $key=>$elem) { 
-            if(is_array($elem)) 
-            { 
-                for($i=0;$i<count($elem);$i++) 
-                { 
-                    $content .= $key2."[] = \"".$elem[$i]."\"\n"; 
-                } 
-            } 
-            else if($elem=="") $content .= $key2." = \n"; 
-            else $content .= $key2." = \"".$elem."\"\n"; 
-        } 
-    } 
+function saveconfig($assoc_arr, $path, $has_sections=FALSE) {
+	$content = "";
+	if ($has_sections) {
+		foreach ($assoc_arr as $key=>$elem) {
+			$content .= "[".$key."]\n";
+			foreach ($elem as $key2=>$elem2) {
+			if(is_array($elem2))
+                {
+                    for($i=0;$i<count($elem2);$i++)
+                    {
+                        $content .= $key2."[] = \"".$elem2[$i]."\"\n";
+                    }
+                }
+                else if($elem2=="") $content .= $key2." = \n";
+                else $content .= $key2." = \"".$elem2."\"\n";
+            }
+        }
+    }
+    else {
+        foreach ($assoc_arr as $key=>$elem) {
+            if(is_array($elem))
+            {
+                for($i=0;$i<count($elem);$i++)
+                {
+                    $content .= $key2."[] = \"".$elem[$i]."\"\n";
+                }
+            }
+            else if($elem=="") $content .= $key2." = \n";
+            else $content .= $key2." = \"".$elem."\"\n";
+        }
+    }
 
-    if (!$handle = fopen($path, 'w')) { 
-        return false; 
-    } 
-    if (!fwrite($handle, $content)) { 
-        return false; 
-    } 
-    fclose($handle); 
-    return true; 
+    if (!$handle = fopen($path, 'w')) {
+        return false;
+    }
+    if (!fwrite($handle, $content)) {
+        return false;
+    }
+    fclose($handle);
+    return true;
 }
 ?>
 ]]>
@@ -458,13 +432,13 @@ function saveconfig($assoc_arr, $path, $has_sections=FALSE) {
 <INLINE>
 <![CDATA[
 <?PHP
-$newznab_extras_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_extras.cfg");
+$newznab_extras_cfg = parse_ini_file( "/boot/config/plugins/newznab_extras/newznab_extras.cfg", true);
 #$newznab_cfg = parse_ini_file( "/boot/config/plugins/newznab/newznab.cfg" );
 $searchd_idx = shell_exec ( "indextool --dumpheader releases.sph 2> /dev/null | grep total-documents | cut -d\" \" -f2" );
 $searchd_running = shell_exec ( "/etc/rc.d/rc.searchd status_check" );
 $searchd_stats = shell_exec ( "/etc/rc.d/rc.searchd status");
 $cron_inst = shell_exec ( "/etc/rc.d/rc.newznab_cron status_check");
-$mi_inst = file_exists ( "/usr/bin/mediainfo" ) ? "yes" : "no" ;
+$mediainfo_inst = file_exists ( "/usr/bin/mediainfo" ) ? "yes" : "no" ;
 $htop_inst = file_exists ( "/usr/bin/htop" ) ? "yes" : "no" ;
 $screen_inst = file_exists ( "/usr/bin/screen" ) ? "yes" : "no" ;
 $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
@@ -486,34 +460,45 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 		<div id="title">
 			<span class="left">Install Status:&#32;</span>
 		</div>
-		<span class="left">Searchd: 
-			<?if($searchd_inst=="yes"):?>		
-				<span class="green"><b>Installed</b></span>
-			<?else:?>
-				<span class="red"><b>Not Installed</b></span>
-			<?endif;?>
-		</span>
-		<span class="left">Mediainfo: 
-			<?if($mediainfo_inst=="yes"):?>		
-				<span class="green"><b>Installed</b></span>
-			<?else:?>
-				<span class="red"><b>Not Installed</b></span>
-			<?endif;?>
-		</span>	
-		<span class="left">htop: 
-			<?if($htop_inst=="yes"):?>		
-				<span class="green"><b>Installed</b></span>
-			<?else:?>
-				<span class="red"><b>Not Installed</b></span>
-			<?endif;?>
-		</span>
-		<span class="left">Screen: 
-			<?if($screen_inst=="yes"):?>		
-				<span class="green"><b>Installed</b></span>
-			<?else:?>
-				<span class="red"><b>Not Installed</b></span>
-			<?endif;?>
-		</span>
+		<table class="settings">
+		<tr>
+			<td>Searchd:</td>
+			<td><?if($searchd_inst=="yes"):?>		
+					<span class="green"><b>Installed</b></span>
+				<?else:?>
+					<span class="red"><b>Not Installed</b></span>
+				<?endif;?>
+			</td>
+		</tr>
+		<tr>
+			<td>Mediainfo:</td>
+			<td><?if($mediainfo_inst=="yes"):?>		
+					<span class="green"><b>Installed</b></span>
+				<?else:?>
+					<span class="red"><b>Not Installed</b></span>
+				<?endif;?>
+			</td>
+		</tr>
+		<tr>
+			<td>htop:</td> 
+			<td>
+				<?if($htop_inst=="yes"):?>		
+					<span class="green"><b>Installed</b></span>
+				<?else:?>
+					<span class="red"><b>Not Installed</b></span>
+				<?endif;?>
+			</td>
+		</tr>
+		<tr>
+			<td>Screen:</td>
+			<td><?if($screen_inst=="yes"):?>		
+					<span class="green"><b>Installed</b></span>
+				<?else:?>
+					<span class="red"><b>Not Installed</b></span>
+				<?endif;?>
+			</td>
+		</tr>
+		</table>
 	</div>
 	<div style="width: 49%; float:right">
 		<div id="title">
@@ -523,27 +508,38 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 			<input type="hidden" name="cmd" value="apply_installer">
 			<table class="settings">
 				<tr>
-					<td>Install:</td>
-	       			<td><select name="MEDIAINFO_STATUS" size="1">
-					<?=mk_option($newsnab_extras_cfg['INSTALLER']['MEDIAINFO_STATUS'], "disable", "No");?>
-					<?=mk_option($newsnab_extras_cfg['INSTALLER']['MEDIAINFO_STATUS'], "enable", "Yes");?>
+					<td>Seachd:</td>
+	       			<td><select name="SEARCHD_INSTALL" size="1">
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['SEARCHD_INSTALL'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['SEARCHD_INSTALL'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
-					<td>Install:</td>
-	       			<td><select name="HTOP_STATUS" size="1">
-					<?=mk_option($newsnab_extras_cfg['INSTALLER']['HTOP_STATUS'], "disable", "No");?>
-					<?=mk_option($newsnab_extras_cfg['INSTALLER']['HTOP_STATUS'], "enable", "Yes");?>
+					<td>Mediainfo:</td>
+	       			<td><select name="MEDIAINFO_INSTALL" size="1">
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['MEDIAINFO_INSTALL'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['MEDIAINFO_INSTALL'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
-					<td>Install:</td>
-	       			<td><select name="SCREEN_STATUS" size="1">
-					<?=mk_option($newsnab_extras_cfg['INSTALLER']['SCREEN_STATUS'], "disable", "No");?>
-					<?=mk_option($newsnab_extras_cfg['INSTALLER']['SCREEN_STATUS'], "enable", "Yes");?>
+					<td>htop:</td>
+	       			<td><select name="HTOP_INSTALL" size="1">
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['HTOP_INSTALL'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['HTOP_INSTALL'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>Screen:</td>
+	       			<td><select name="SCREEN_INSTALL" size="1">
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['SCREEN_INSTALL'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['SCREEN_INSTALL'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 			</table>
+			<div align="center">
+				<hr size="3" align="center" width="75%" color="grey" style="margin-top:20px;margin-bottom:18px" >
+				<input type="submit" name="runCmd" value="Apply" style="margin-bottom:35px">
+			</div>
 		</form>
 	</div>
 </div>
@@ -569,18 +565,19 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 				<tr>
 					<td>Enable:</td>
 	       			<td><select name="SEARCHD_STATUS" size="1">
-					<?=mk_option($newsnab_extras_cfg['SEARCHD']['SEARCHD_STATUS'], "disable", "No");?>
-					<?=mk_option($newsnab_extras_cfg['SEARCHD']['SEARCHD_STATUS'], "enable", "Yes");?>
+					<?=mk_option($newznab_extras_cfg['SEARCHD']['SEARCHD_STATUS'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['SEARCHD']['SEARCHD_STATUS'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 				<tr>
 					<td>Newznab directory:</td>
-					<td><input type="text" name="SEARCHD_BASE" maxlength="40" value="<?=$newsnab_extras_cfg['SEARCHD']['SEARCHD_BASE'];?>"></td>
-				</tr>
-					<td></td>
-					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
+					<td><input type="text" name="SEARCHD_BASE" maxlength="40" value="<?=$newznab_extras_cfg['SEARCHD']['SEARCHD_BASE'];?>"></td>
 				</tr>
 			</table>
+			<div align="center">
+				<hr size="3" align="center" width="75%" color="grey" style="margin-top:20px;margin-bottom:18px" >
+				<input type="submit" name="runCmd" value="Apply" style="margin-bottom:35px">
+			</div>
 		</form>
 	</div>
 </div>
@@ -658,10 +655,11 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 					<?=mk_option($newznab_extras_cfg['CRON']['CRON_CLEAN'], "enable", "Yes");?>
 					</select></td>
 				</tr>
-					<td></td>
-					<td><input type="submit" name="runCmd" value="Apply"><button type="button" onClick="done();">Done</b$
-				</tr>
 			</table>
+			<div align="center">
+				<hr size="3" align="center" width="75%" color="grey" style="margin-top:20px;margin-bottom:18px" >
+				<input type="submit" name="runCmd" value="Apply" style="margin-bottom:35px">
+			</div>
 		</form>
 	</div>
 </div>
