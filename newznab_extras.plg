@@ -480,36 +480,37 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 <div>
 	<div id="title">
 		<span class="left">Configure:&#32;&emsp;
-		<select onchange="show(this)">
-			<option value="0">Chose</option>
-			<option selected="selected" value="1">Packages</option>
-			<?if($searchd_inst=="yes"):?>
-				<option value="2">Searchd</option>
-			<?endif;?>
-			<?if($cron_inst=="yes"):?>
-				<option value="3">NewznabCron</option>
-			<?endif;?>
-		</select>
-<? if ($plugin_rollback=="yes"): ?>
-	<div class="right">
-		<form name="newznab_extras_update1" method="POST" action="/update.htm" target="progressFrame">
-			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">
-			<input type="submit" name="runCmd" value="Update PLG">
-		</form>
-		<form name="newznab_extras_downgrade" method="POST" action="/update.htm" target="progressFrame">
-			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer downgradeplg">
-			<input type="submit" name="runCmd" value="Downgrade PLG">
-		</form>
+			<select onchange="show(this)">
+				<option value="0">Chose</option>
+				<option selected="selected" value="1">Packages</option>
+				<?if($searchd_inst=="yes"):?>
+					<option value="2">Searchd</option>
+				<?endif;?>
+				<?if($cron_inst=="yes"):?>
+					<option value="3">NewznabCron</option>
+				<?endif;?>
+			</select>
+		<? if ($plugin_rollback=="yes"): ?>
+			<div class="right">
+				<form name="newznab_extras_update1" method="POST" action="/update.htm" target="progressFrame">
+					<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">
+					<input type="submit" name="runCmd" value="Update PLG">
+				</form>
+				<form name="newznab_extras_downgrade" method="POST" action="/update.htm" target="progressFrame">
+					<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer downgradeplg">
+					<input type="submit" name="runCmd" value="Downgrade PLG">
+				</form>
+			</div>
+		<?else:?>
+			<div style="position:relative;float:right;width:100%;text-align:center;margin-bottom:24px">
+				<form name="newznab_extras_update" method="POST" action="/update.htm" target="progressFrame">
+					<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">			
+					<input type="submit" name="runCmd" value="Update PLG">
+				</form>
+			</div>
+		<?endif;?>
+		</span>
 	</div>
-<?else:?>
-	<div style="position:relative;float:right;width:100%;text-align:center;margin-bottom:24px">
-		<form name="newznab_extras_update" method="POST" action="/update.htm" target="progressFrame">
-			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">			
-			<input type="submit" name="runCmd" value="Update PLG">
-		</form>
-	</div>
-<?endif;?>
-</span>
 </div>
 <div id="myDiv1">
 	<div style="width: 49%; float:left">
