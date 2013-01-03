@@ -87,6 +87,11 @@ install_screen() {
 	add_pkg http://slackware.cs.utah.edu/pub/slackware/slackware-13.1/slackware/ap/ screen-4.0.3-i486-1.txz
 }
 
+install_tmux() {
+	add_pkg http://mux.net/~tybio/plugins/ tmux-1.6.tgz
+	ln -s /lib/libncurses.so.5.7 /lib/libtinfo.so.5
+}
+
 install_searchd() {
 	add_pkg http://slackware.org.uk/slacky/slackware-13.1/database/postgresql/8.4.4/ postgresql-8.4.4-i486-1sl.txz
 	add_pkg http://mux.net/~tybio/plugins/ sphinxsearch_2.0.6_i386.tgz
@@ -150,6 +155,9 @@ case "$1" in
 	;;
 	'install_searchd')
 		install_searchd
+	;;
+	'install_tmux')
+		install_tmux
 	;;
 	'updateplg')
 		updateplg
@@ -374,6 +382,7 @@ switch ($_POST['cmd']) {
 		$ini["INSTALLER"]["MEDIAINFO_INSTALL"]=$_POST['MEDIAINFO_INSTALL'];
 		$ini["INSTALLER"]["HTOP_INSTALL"]=$_POST['HTOP_INSTALL'];
 		$ini["INSTALLER"]["SCREEN_INSTALL"]=$_POST['SCREEN_INSTALL'];
+		$ini["INSTALLER"]["TMUX_INSTALL"]=$_POST['TMUX_INSTALL'];
 		print_r($ini);
 		saveconfig($ini, $configfile, TRU);
 	break;
@@ -491,7 +500,7 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 				<?endif;?>
 			</select>
 		<? if ($plugin_rollback=="yes"): ?>
-			<div class="right">
+			<span class="right">
 				<form name="newznab_extras_update1" method="POST" action="/update.htm" target="progressFrame">
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">
 					<input type="submit" name="runCmd" value="Update PLG">
@@ -500,14 +509,16 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer downgradeplg">
 					<input type="submit" name="runCmd" value="Downgrade PLG">
 				</form>
-			</div>
+			</span>
 		<?else:?>
+			<span class="right">
 			<div style="position:relative;float:right;width:100%;text-align:center;margin-bottom:24px">
 				<form name="newznab_extras_update" method="POST" action="/update.htm" target="progressFrame">
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">			
 					<input type="submit" name="runCmd" value="Update PLG">
 				</form>
 			</div>
+			</span>
 		<?endif;?>
 		</span>
 	</div>
@@ -555,6 +566,15 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 				<?endif;?>
 			</td>
 		</tr>
+		<tr>
+			<td>tmux:</td>
+			<td><?if($tmux_inst=="yes"):?>		
+					<span class="green"><b>Installed</b></span>
+				<?else:?>
+					<span class="red"><b>Not Installed</b></span>
+				<?endif;?>
+			</td>
+		</tr>
 		</table>
 	</div>
 	<div style="width: 49%; float:right">
@@ -590,6 +610,13 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 	       			<td><select name="SCREEN_INSTALL" size="1">
 					<?=mk_option($newznab_extras_cfg['INSTALLER']['SCREEN_INSTALL'], "disable", "No");?>
 					<?=mk_option($newznab_extras_cfg['INSTALLER']['SCREEN_INSTALL'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+				<tr>
+					<td>tmux:</td>
+	       			<td><select name="TMUX_INSTALL" size="1">
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['TMUX_INSTALL'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['TMUX_INSTALL'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 			</table>
