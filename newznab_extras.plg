@@ -474,6 +474,7 @@ $mediainfo_inst = file_exists ( "/usr/bin/mediainfo" ) ? "yes" : "no" ;
 $htop_inst = file_exists ( "/usr/bin/htop" ) ? "yes" : "no" ;
 $screen_inst = file_exists ( "/usr/bin/screen" ) ? "yes" : "no" ;
 $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
+$plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" ) ? "yes" : "no" ;
 
 ?>
 <div>
@@ -491,7 +492,7 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 		</select>
 	</div>
 </div>
-<? if ($couchpotato_rollback=="yes"): ?>
+<? if ($plugin_rollback=="yes"): ?>
 	<div style="position:relative;float:left;width:50%;text-align:right;margin-bottom:24px">
 		<form name="couchpotato_v2_update1" method="POST" action="/update.htm" target="progressFrame">
 			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">
