@@ -492,20 +492,20 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 		</select>
 <? if ($plugin_rollback=="yes"): ?>
 	<div style="position:relative;float:right;text-align:right;margin-bottom:24px">
-		<form name="couchpotato_v2_update1" method="POST" action="/update.htm" target="progressFrame">
+		<form name="newznab_extras_update1" method="POST" action="/update.htm" target="progressFrame">
 			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">
 			<input type="submit" name="runCmd" value="Update PLG">
 		</form>
 	</div>
 	<div style="position:relative;float:right;text-align:left;margin-bottom:24px">
-		<form name="couchpotato_v2_downgrade" method="POST" action="/update.htm" target="progressFrame">
+		<form name="newznab_extras_downgrade" method="POST" action="/update.htm" target="progressFrame">
 			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer downgradeplg">
 			<input type="submit" name="runCmd" value="Downgrade PLG">
 		</form>
 	</div>
 <?else:?>
 	<div style="position:relative;float:right;width:100%;text-align:center;margin-bottom:24px">
-		<form name="couchpotato_v2_update" method="POST" action="/update.htm" target="progressFrame">
+		<form name="newznab_extras_update" method="POST" action="/update.htm" target="progressFrame">
 			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">			
 			<input type="submit" name="runCmd" value="Update PLG">
 		</form>
