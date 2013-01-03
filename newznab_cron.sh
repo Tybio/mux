@@ -2,17 +2,36 @@
 #
 # Features:
 #  * Lock file 
-#	Newznab does not protect the DB when it runs, having two scripts updating
-#	the Database WILL cause corruption
 #  * Logging
-#	Normal update status is redirected to a configurable log file, can be used
-#	with example logrotate.conf.
 #  * Built for Cron
-#	With only errors reported to the caller, the script is built to be run
-#	from within cron
 #  * Scheduled Optimization
 #  * Advanced Newznab processing support
-#	Enable/Disable nzb-importmodified.php and update_parsing.php
+#	
+###################################
+#  Use:
+#
+#  This script can be called from the command line, or via cron.  There are a great
+#     many options, but to start the defaults should work well enough.
+#
+#  If you are not running via the unRAID plugin, edit the variables:
+#
+#	  CRON_BASE:    directory where Newznab is installed (eg: /var/www/nnplus )
+#	  CRON_IMPDIR:  Directory containing nzb files to import (Only needed if -i passed)
+#    
+#   The other variables are optional, they are set to solid defaults.  You control what
+#      the script does from here with flags:
+#
+#   Examples:
+#
+#     newznab_cron.sh -t -i             Threaded, Import NZBs
+#     newznab_cron.sh -p -c -t          Update Parsing, Cleanup, Threaded
+#
+#  To add to cron, make sure you are the user who normally runs the update process
+#     and enter 'crontab -e' at the prompt.  Then add the following line to the bottom
+#
+#  */5 * * * * /<PATH>/newznab_cron.sh
+#
+# #################################
 #
 # Options:
 #  (All credit to overbyrn on the unRAID forums for creating the help section)
@@ -75,6 +94,8 @@ else
 	# Interval to run optimization
 	CRON_OINT=43200
 	#
+	# Number of nzbs to import each cycle
+	CRON_IMPNUM=100
 	# Debugging, leave off unless you need it
 	#set -xv
 fi
@@ -180,7 +201,7 @@ $PHPBIN ${NEWZNAB_PATH}/update_releases.php 2> /dev/null | log
 if [ "$CRON_IMP" = "enable" ]; then
 	IMP_NZB_C=`ls -alh ${CRON_IMPDIR} | wc -l`
 	log "INFO: Importing NZBs, $IMP_NZB_C waiting."
-	$PHPBIN ${CRON_BASE}/www/admin/nzb-importmodified.php ${CRON_IMPDIR} true | log 
+	$PHPBIN ${CRON_BASE}/www/admin/nzb-import.php ${CRON_IMPDIR} true ${CRON_IMPNUM} 10000 | log 
 	IMP_NZB_P=`ls -alh ${CRON_IMPDIR} | wc -l`
 	log "INFO: Imported NZBs, $IMP_NZB_P left."
 	log "INFO: Updating releases"
@@ -202,7 +223,7 @@ if [ "$DOOPT" = "enable" ]; then
 		$PHPBIN ${CRON_BASE}/misc/testing/update_parsing.php | log
 	fi
 	if [ "$CRON_CLEAN" = "enable" ]; then
-		log "INFO: Cleaning up useless releases"
+		log "INFO: Cleaning up useless releases (Be sure you have edited update_cleanup.php or it will not actually do anything)"
 		$PHPBIN ${CRON_BASE}/misc/testing/update_cleanup.php | log
 	fi
 	log "INFO: Setting timestamp"
