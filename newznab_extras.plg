@@ -490,7 +490,6 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 				<option value="3">NewznabCron</option>
 			<?endif;?>
 		</select>
-	</div>
 <? if ($plugin_rollback=="yes"): ?>
 	<div style="position:relative;float:right;text-align:right;margin-bottom:24px">
 		<form name="couchpotato_v2_update1" method="POST" action="/update.htm" target="progressFrame">
