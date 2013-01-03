@@ -479,7 +479,7 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 ?>
 <div>
 	<div id="title">
-		<span class="left">Configure:&#32;&emsp;</span>
+		<span class="left">Configure:&#32;&emsp;
 		<select onchange="show(this)">
 			<option value="0">Chose</option>
 			<option selected="selected" value="1">Packages</option>
@@ -512,6 +512,7 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 		</form>
 	</div>
 <?endif;?>
+</span>
 </div>
 <div id="myDiv1">
 	<div style="width: 49%; float:left">
