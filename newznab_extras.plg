@@ -448,7 +448,8 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 	<div id="title">
 		<span class="left">Configure:&#32;&emsp;</span>
 		<select onchange="show(this)">
-			<option value="1">Packages</option>
+			<option value="0">Chose</option>
+			<option selected="selected" value="1">Packages</option>
 			<?if($searchd_inst=="yes"):?>
 				<option value="2">Searchd</option>
 			<?endif;?>
@@ -458,7 +459,7 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 		</select>
 	</div>
 </div>
-<div id="myDiv1" style="display: none;">
+<div id="myDiv1">
 	<div style="width: 49%; float:left">
 		<div id="title">
 			<span class="left">Install Status:&#32;</span>
@@ -672,9 +673,10 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 		count = obj.options.length;
 		for(i=1;i<count;i++)
 			document.getElementById('myDiv'+i).style.display = 'none';
-			if(no>0)
-				document.getElementById('myDiv'+no).style.display = 'block';
-			}
+		if(no) {
+			document.getElementById('myDiv'+no).style.display = 'block';
+		}
+}
 </script>
 ]]>
 </INLINE>
