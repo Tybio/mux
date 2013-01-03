@@ -448,10 +448,13 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 	<div id="title">
 		<span class="left">Configure:&#32;&emsp;</span>
 		<select onchange="show(this)">
-			<option value="0">Chose</option>
-			<option value="1">Optional Installs</option>
-			<option value="2">SphinxSearch</option>
-			<option value="3">NewznabCron</option>
+			<option value="1">Packages</option>
+			<?if($searchd_inst=="yes"):?>
+				<option value="2">Searchd</option>
+			<?endif;?>
+			<?if($cron_inst=="yes"):?>
+				<option value="3">NewznabCron</option>
+			<?endif;?>
 		</select>
 	</div>
 </div>
