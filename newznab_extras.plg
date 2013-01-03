@@ -92,6 +92,32 @@ install_searchd() {
 	add_pkg http://mux.net/~tybio/plugins/ sphinxsearch_2.0.6_i386.tgz
 }
 
+updateplg()
+{
+	cd /boot/config/plugins
+	[ -f newznab_extras.plg.old ] && rm -f newznab_extras.plg.old
+	if [ -f newznab_extras.plg ]; then
+	mv newznab_extras.plg newznab_extras.plg.old
+	echo "Updating plugin"
+	wget -q --no-check-certificate https://github.com/Tybio/mux/raw/master/newznab_extras.plg
+	/usr/local/sbin/installplg /boot/config/plugins/newznab_extras.plg
+	else
+	echo "Updating plugin"
+	wget -q --no-check-certificate https://github.com/Tybio/mux/raw/master/newznab_extras.plg
+	/usr/local/sbin/installplg /boot/config/plugins/newznab_extras.plg
+	fi
+}
+downgradeplg()
+{
+	cd /boot/config/plugins
+	if [ -f newznab_extras.plg.old ]; then
+	rm -f newznab_extras.plg
+	mv newznab_extras.plg.old newznab_extras.plg
+	echo "downgrading plugin"
+	/usr/local/sbin/installplg /boot/config/plugins/newznab_extras.plg
+	fi
+}
+
 add_pkg() {
 	cd /boot/packages
 	wget -N $1$2 --no-check-certificate
@@ -124,6 +150,12 @@ case "$1" in
 	;;
 	'install_searchd')
 		install_searchd
+	;;
+	'updateplg')
+		updateplg
+	;;
+	'downgradeplg')
+		downgradeplg
 	;;
 	'start')
 		start
@@ -459,6 +491,27 @@ $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
 		</select>
 	</div>
 </div>
+<? if ($couchpotato_rollback=="yes"): ?>
+	<div style="position:relative;float:left;width:50%;text-align:right;margin-bottom:24px">
+		<form name="couchpotato_v2_update1" method="POST" action="/update.htm" target="progressFrame">
+			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">
+			<input type="submit" name="runCmd" value="Update PLG">
+		</form>
+	</div>
+	<div style="position:relative;float:left;width:50%;text-align:left;margin-bottom:24px">
+		<form name="couchpotato_v2_downgrade" method="POST" action="/update.htm" target="progressFrame">
+			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer downgradeplg">
+			<input type="submit" name="runCmd" value="Downgrade PLG">
+		</form>
+	</div>
+<?else:?>
+	<div style="position:relative;float:left;width:100%;text-align:center;margin-bottom:24px">
+		<form name="couchpotato_v2_update" method="POST" action="/update.htm" target="progressFrame">
+			<input type="hidden" name="cmd" value="/etc/rc.d/rc.installer updateplg">			
+			<input type="submit" name="runCmd" value="Update PLG">
+		</form>
+	</div>
+<?endif;?>
 <div id="myDiv1">
 	<div style="width: 49%; float:left">
 		<div id="title">
