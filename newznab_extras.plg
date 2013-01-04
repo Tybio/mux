@@ -97,6 +97,10 @@ install_searchd() {
 	add_pkg http://mux.net/~tybio/plugins/ sphinxsearch_2.0.6_i386.tgz
 }
 
+install_bwmng() {
+	add_pkg http://slackware.org.uk/slacky/slackware-13.0/utilities/bwm-ng/0.6/ bwm-ng-0.6-i486-3bj.txz
+}
+
 updateplg()
 {
 	cd /boot/config/plugins
@@ -158,6 +162,9 @@ case "$1" in
 	;;
 	'install_tmux')
 		install_tmux
+	;;
+	'install_bwmng')
+		install_bwmng
 	;;
 	'updateplg')
 		updateplg
@@ -383,6 +390,7 @@ switch ($_POST['cmd']) {
 		$ini["INSTALLER"]["HTOP_INSTALL"]=$_POST['HTOP_INSTALL'];
 		$ini["INSTALLER"]["SCREEN_INSTALL"]=$_POST['SCREEN_INSTALL'];
 		$ini["INSTALLER"]["TMUX_INSTALL"]=$_POST['TMUX_INSTALL'];
+		$ini["INSTALLER"]["BWMNG_INSTALL"]=$_POST['BWMNG_INSTALL'];
 		print_r($ini);
 		saveconfig($ini, $configfile, TRU);
 	break;
@@ -483,6 +491,8 @@ $mediainfo_inst = file_exists ( "/usr/bin/mediainfo" ) ? "yes" : "no" ;
 $htop_inst = file_exists ( "/usr/bin/htop" ) ? "yes" : "no" ;
 $screen_inst = file_exists ( "/usr/bin/screen" ) ? "yes" : "no" ;
 $searchd_inst = file_exists ( "/usr/bin/searchd" ) ? "yes" : "no" ;
+$bwmng_inst = file_exists ( "/usr/bin/bwm-ng" ) ? "yes" : "no" ;
+$tmux_inst = file_exists ( "/usr/bin/tmux" ) ? "yes" : "no" ;
 $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" ) ? "yes" : "no" ;
 
 ?>
@@ -575,6 +585,15 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 				<?endif;?>
 			</td>
 		</tr>
+		<tr>
+			<td>tmux:</td>
+			<td><?if($bwmng_inst=="yes"):?>		
+					<span class="green"><b>Installed</b></span>
+				<?else:?>
+					<span class="red"><b>Not Installed</b></span>
+				<?endif;?>
+		</td>
+		</tr>
 		</table>
 	</div>
 	<div style="width: 49%; float:right">
@@ -617,6 +636,13 @@ $plugin_rollback = file_exists ( "/boot/config/plugins/newznab_extras.plg.old" )
 	       			<td><select name="TMUX_INSTALL" size="1">
 					<?=mk_option($newznab_extras_cfg['INSTALLER']['TMUX_INSTALL'], "disable", "No");?>
 					<?=mk_option($newznab_extras_cfg['INSTALLER']['TMUX_INSTALL'], "enable", "Yes");?>
+					</select></td>
+				</tr>
+					<tr>
+					<td>bwm-ng:</td>
+	       			<td><select name="BWMNG_INSTALL" size="1">
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['BWMNG_INSTALL'], "disable", "No");?>
+					<?=mk_option($newznab_extras_cfg['INSTALLER']['BWMNG_INSTALL'], "enable", "Yes");?>
 					</select></td>
 				</tr>
 			</table>
