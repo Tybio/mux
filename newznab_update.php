@@ -18,81 +18,7 @@ Quick Start:
 
 	Mirror current screen script: newznab_update.php --loop=10
 
-Advanced use:
-
-	1> run: newznab_update.php -w
-	2> edit configuration file (Located at www/update.ini)
-	3> run: newznab_update.php
-	4> Profit
-
-Use: newznab_update.php [-opts] 
-
- Control Options:
-    -w                     Write options to configuration file and exit
-    -v                     Echo all log to STDOUT
-    -q                     Just log status messages, not output from NN
-    -h                     Help
-    --loop=<Minutes>       Loop the script so it runs every # Minutes
-    --enh-loop=<Cycles>    This is a more complex version of a --loop where time is not used
-                              In this version, you will loop <Cycles> of postprocessing between
-                              full updates. (See Examples)
-    --loglevel=<level>     Messages to log (Default: info)
-
- Optimisation Options:
-    -p                     Enhanced postprocessing (Testing)
-    -c                     Cleanup unusable releases (Testing)
-    --optint=<Number>      <Number> of seconds between opt runs (Default: 43200)
-
- Newznab Options:
-    --threads=<threads>    Use threading where supported with <threads> number of threads
-    --import=<Directory>   Import NZBs from <directory>
-    --impnum=<Number>      Import <Number> of nzbs per loop (Default: 100)
-    ***<FUTURE>***
-    --backfill=<Date>      Backfill active groups to <date>
-                              Format: YYYY-MM-DD
-
- Daemon Options:
-    ***<FUTURE>***
-	* Can not be combined with any other options
-	* Requires configuration file
-	--daemon=<status>       Start Daemon mode and exicute <status>
-	    start                  Start daemon with options in configuration
-	    stop                   exit after current loop
-	    kill                   exit instantly (Same as kill -9)
-	    status                 Check status and return stats
-
- Examples:
-    Basic update loop, pause for 10 minutes:
-        newznab_update.php --loop=10
-
-    Enhanced loop and postprocess
-        newznab_update.php -p --enh-loop=2
-             Loop: update_binaries, update_releases, postprocess, postprocess, update_binaries...
-             Will break in after update_releases to preform optimisation when timer expires
-
-    Loop, import and postprocess:
-        newznab_update.php -p --loop=10 --import=/tmp/nzbs
-
-    Loop, import, postprocess and backfill
-        newznab_update.php -p --loop=10 --import=/tmp/nzbs --backfill=2012-08-01
-
-    Screen mode (Same process as newznab_cron, with enhancements):
-        screen newznab_update.php -v --loop=10
-
-    ***< Future >***
-    Daemon mode
-
-        Set basic config:
-          newznab_update.php --threads=10 --import=/tmp/nzbs --importnum=500 -w
-        Start daemon
-          newznab_update.php --daemon=start
-        Get stats:
-          newznab_update --daemon=status
-
-TODO:
-	* Get a patch in for update_binaries_threaded.php to take Thread number from command line
-	* Finish daemon function
-	* Split control functions into library class
+	For a LOT more information, use --help
 */
 
 // Uncomment for debugging
@@ -101,8 +27,9 @@ TODO:
 
 // Import needed items
 include("Console/Getopt.php");
-require("config.php");
 require_once("Log.php");
+require(dirname(__FILE__)."/../../www/config.php");
+require("nnstats/lib/stats.php");
 require_once(WWW_DIR."/lib/releases.php");
 require_once(WWW_DIR."/lib/framework/db.php");
 require_once(WWW_DIR."/lib/postprocess.php");
@@ -117,17 +44,17 @@ pcntl_signal(SIGHUP, "sigHandler");
 $ini = parseOpts();
 
 // Setup;
-list($stats, $daemon, $logger) = init($ini);
+list($daemon, $logger) = init($ini);
 
 // Main Loop
 if ( $ini['loop'] > 0 || $ini['enh-loop'] > 0) {
+	$cycle = '0';
 	while(1) {
 		if ( $daemon['new-signal'] ) { sigCheck($daemon, $ini, $logger); }
 		$cycle++;
 		$logger->info("Starting Loop $cycle");
-		$stats['current']['start'] = time();
 		process($ini, $logger);
-		$stats = doStats($stats, $logger);
+		doStats($logger);
 		$logger->info("Loop finished, waiting $ini[loop] minutes....");
 		if ( $ini['enh-loop'] > 0 ) {
 			doPostprocess($ini, $logger);
@@ -135,11 +62,12 @@ if ( $ini['loop'] > 0 || $ini['enh-loop'] > 0) {
 			sleep($ini['loop'] * 60);
 		}
 	}
+} elseif ( $ini['catchup'] ) {
+	$logger->info("Starting infinant postprocessing loop");
+	doPostprocess($ini, $logger);
 } else {
 	$logger->info('Start single pass');
-	$stats['current']['start'] = time();
 	process($ini, $logger);
-	doStats($stats, $logger);
 }
 
 // Clean shutdown
@@ -152,25 +80,35 @@ function process($ini, $logger) {
 	$oldid = $logger->getIdent();
 	$logger->setIdent('proc');
 	$logger->debug('Entering Process function');
-	if ( $ini['threads'] > '1' ) {
-		$logger->debug('Starting threaded binary update');
-		doCmd($logger, $ini, 'update_binaries_threaded.php');
-	} else {
-		$logger->debug('Starting binary update');
-		doCmd($logger, $ini, 'update_binaries.php'); 
-	}
+	$logger->debug('Checking for binary update');
+	doBinaries($ini, $logger);
 	$logger->debug('Starting releases update');
-	doCmd($logger, $ini, 'update_releases.php');
+	doCmd($logger, $ini, '../update_scripts/update_releases.php');
 	$logger->info('Checking optimisation timers');
 	doOpt($ini, $logger);
 	$logger->debug('Checking for import');
 	doImport($ini, $logger);
-	$logger->debug("Checking for backfill");
-	doBackfill($ini, $logger);
 	$logger->debug('Exiting Process function');
 	$logger->setIdent($oldid);
 }
 
+function doStats($logger) {
+	$oldid = $logger->getIdent();
+	$logger->setIdent('stats');
+	$stat = new Stats();
+	if ( !$stat ) { 
+		$logger->err("Stats DB failure.");
+		return;
+	}
+	$all = $stat->getAllStats();
+	$table = $stat->statTable($all);
+	foreach ($table as $line) {
+		$logger->info("$line");
+	}
+	$stat->saveStats($all);
+	$logger->setIdent($oldid);
+	return;
+}
 function doCmd($logger, $ini, $cmd, $opts='') {
 	$basename = basename($cmd, ".php");
 	$oldid = $logger->getIdent();
@@ -190,6 +128,20 @@ function doCmd($logger, $ini, $cmd, $opts='') {
 	$logger->setIdent($oldid);
 }
 
+function doBinaries($ini, $logger) {
+	if ( $ini['skipbin'] ) {
+		$logger->info('Skipping update_binaries');
+		return;
+	}
+	if ( $ini['threads'] > '1' ) {
+		$logger->debug('Starting threaded binary update');
+		doCmd($logger, $ini, '../update_scripts/update_binaries_threaded.php');
+	} else {
+		$logger->debug('Starting binary update');
+		doCmd($logger, $ini, '../update_scripts/update_binaries.php'); 
+	}
+}
+
 function doOpt($ini, $logger) {
 	$oldid = $logger->getIdent();
 	$logger->setIdent('opt ');
@@ -204,11 +156,13 @@ function doOpt($ini, $logger) {
 			return;
 		}
 	}	
-	//doCmd($logger, $ini, 'optimise_db.php');
-	doCmd($logger, $ini, 'update_tvschedule.php');
-	doCmd($logger, $ini, 'update_theaters.php');
-	if ( $ini['parsing'] ) { doCmd($logger, $ini, '../testing/update_parsing.php'); }
-	if ( $ini['clean'] ) { doCmd($logger, $ini, '../testing/update_cleanup.php'); }
+	doCmd($logger, $ini, '../update_scripts/optimise_db.php');
+	doCmd($logger, $ini, '../update_scripts/update_tvschedule.php');
+	doCmd($logger, $ini, '../update_scripts/update_theaters.php');
+	if ( $ini['parsing'] ) { doCmd($logger, $ini, '../update_scripts/update_parsing.php'); }
+	if ( $ini['clean'] ) { doCmd($logger, $ini, '../update_scripts/update_cleanup.php'); }
+	$logger->debug("Checking for backfill");
+	doBackfill($ini, $logger);
 	file_put_contents($ini['optfilepath'], time());
 	$logger->setIdent($oldid);
 }
@@ -227,10 +181,16 @@ function doImport($ini, $logger) {
 		return;
 	}
 	$impcmd = WWW_DIR."admin/nzb-import.php";
-	$impopt = $ini[import]." true ".$ini[impnum]." 10000";
+	$impopt = $ini['import']." true ".$ini['impnum'];
 	$logger->debug("Cmd: $impcmd -> Opts: $impopt");
 	$logger->info("Importing from $ini[import]");
 	doCmd($logger, $ini, $impcmd, $impopt);
+	$impdir = $ini['import'];
+	$Directory = new RecursiveDirectoryIterator($ini['import']);
+	$Iterator = new RecursiveIteratorIterator($Directory);
+	$Regex = new RegexIterator($Iterator, '/^.+\.nzb$/i', RecursiveRegexIterator::GET_MATCH);
+	$filecount = iterator_count($Regex);
+	$logger->info("$filecount left to import from $ini[import].");
 	$logger->setIdent($oldid);
 }
 
@@ -242,7 +202,6 @@ function doBackfill($ini, $logger) {
 		$logger->setIdent($oldid);
 		return;
 	}
-	$logger->setIdent('bkfl');
 	if ( !preg_match('/\d{4}-\d{2}-\d{2}/', $ini['backfill']) ) {
 		$logger->err("Date format for backfill wrong, please use YYYY-MM-DD");
 		$logger->setIdent($oldid);
@@ -256,12 +215,19 @@ function doBackfill($ini, $logger) {
 	$logger->debug("Incrimenting active groups with less than $days days configured by 1");
 	$bkIncDay = "UPDATE groups set backfill_target=backfill_target+1 where active=1 and backfill_target<$days;";
 	$logger->debug("Query: $bkIncDay");
+	if(defined('DB_PORT')){
+		$db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT);
+	}else{
+		$db = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+	}
+        $db->query($bkIncDay);
+	$db->close();
 	if ( $ini['threads'] > '1' ) {
 		$logger->debug('Starting threaded backfill');
-		doCmd($logger, $ini, 'backfill_threaded.php');
+		doCmd($logger, $ini, '../update_scripts/backfill_threaded.php');
 	} else {
 		$logger->debug('Starting backfill');
-		doCmd($logger, $ini, 'backfill.php'); 
+		doCmd($logger, $ini, '../update_scripts/backfill.php'); 
 	}
 	$logger->setIdent($oldid);
 	return;
@@ -271,96 +237,21 @@ function doPostprocess($ini, $logger) {
 	$oldid = $logger->getIdent();
 	$logger->setIdent('pp  ');
 	$logger->info("Starting Postprocessing (Direct)");
-	$logger->debug("Doing $loops");
-	$start = time();
-	while ( $c < $ini['enh-loop'] ) {
+	if ( !$ini['catchup'] ) { 
+		$logger->debug("Doing $loops"); 
+		$start = time();
+	}
+	while ( $c < $ini['enh-loop'] || $ini['catchup'] ) {
 		$logger->info("Staring postprocessing loop $c");
 		$postprocess = new PostProcess();
 		$postprocess->processAll();
+		$logger->info("Finished loop $c");
 		$c++;
 	}
-
 	$end = time();
 	$run = cnvSec($end - $start);
 	$logger->info("Finished Postprocessing -> $run");
 	$logger->setIdent($oldid);
-}
-
-function getInfo($data, $logger) {
-	switch ($data) {
-		case 'relCount':
-			$releases = new Releases();
-			$rel = $releases->getCount();
-			$logger->debug("Rel query returned: $rel");
-			return($rel);
-		case 'nfoCount':
-			$db = new DB();
-			$res = $db->queryDirect('SELECT rn.*, r.searchname FROM releasenfo rn left outer join releases r ON r.ID = rn.releaseID WHERE rn.nfo IS NULL AND rn.attempts <= 3');
-			$nfo = $db->getNumRows($res);
-			$logger->debug("Nfo query returned: $nfo");
-			return($nfo);
-		case 'ppCount':
-			$db = new DB();
-			$ppo = $db->queryDirect('SELECT r.* from releases r left join category c on c.ID = r.categoryID where (r.passwordstatus between -6 and -1) or (r.haspreview = -1 and c.disablepreview = 0)');
-			$pp = $db->getNumRows($ppo);
-			$logger->debug("Query returned: $pp");
-			return($pp);
-		default:
-			$logger->error("$data is not a valid option for getInfo");
-	}
-}
-
-function initStats($logger) {
-	$logger->debug("Setting initial stats");
-	$stats = array();
-	$stats["start"]["rel"] = getInfo('relCount', $logger);
-	$stats["start"]["nfo"] = getInfo('nfoCount', $logger);
-	$stats["start"]["pp"] = getInfo('ppCount', $logger);
-	$stats["start"]["time"] = time();
-	$stats["start"]["date"] = date("m/d H:i");
-	// First run, set last to the same as start
-	$stats["last"]["rel"] = $stats["start"]["rel"];
-	$stats["last"]["nfo"] = $stats["start"]["nfo"];
-	$stats["last"]["pp"] = $stats["start"]["pp"];
-	$stats["last"]["time"] = $stats["start"]["time"];
-	return($stats);
-}
-
-function doStats($stats, $logger) {
-	// Math (ick)
-	$logger->setIdent("stat");
-	$logger->debug("Starting doStats");
-	$curRel = getInfo('relCount', $logger);
-	$curNfo = getInfo('nfoCount', $logger);
-	$curPp = getInfo('ppCount', $logger);
-	$totalTime = cnvSec(time() - $stats['start']['time']);
-	$lastTime = cnvSec(time() - $stats['current']['start']);
-	$totalRel = $stats['start']['rel'] - $curRel;
-	$lastRel = $stats['last']['rel'] - $curRel;
-	$totalNfo = $stats['start']['nfo'] - $curNfo;
-	$lastNfo = $stats['last']['nfo'] - $curNfo;
-	$totalPp = $stats['start']['pp'] - $curPp;
-	$lastPp = $stats['last']['pp'] - $curPp;
-	// Display Stats
-	$format1 = 'Timers ->  Run: %-10 LasLoop: %-10 Loops: %-10';
-	$format = '|%-10.9s|%-15.15s|%-13.13s|%-13.13s|%-13.13s|';
-	$out[] = '+'.str_repeat('-',68).'+';
-	$out[] = sprintf($format, "Interval", "Time", "Releases", "Info Queue", "PP Queue");
-	$out[] = '+'.str_repeat('-', 68).'+';
-	$out[] = sprintf($format, "Startup", $stats["start"]["date"], $stats["start"]["rel"], $stats["start"]["nfo"], $stats["start"]["pp"]);
-	$out[] = sprintf($format, "Elapsed", $totalTime, $totalRel, $totalNfo, $totalPp);
-	$out[] = sprintf($format, "Last loop", $lastTime, $lastRel, $lastNfo, $lastPp);
-	$out[] = '+'.str_repeat('-', 68).'+';
-	foreach ( $out as $i ) {
-		$logger->info("$i");
-	}
-	$logger->setIdent("nnupd");
-	//Set counters for next itteration
-	$stats["last"]["rel"] = $curRel;
-	$stats["last"]["nfo"] = $curNfo;
-	$stats["last"]["pp"] = $curPp;
-	$logger->setIdent("nnup");
-	return($stats);
 }
 
 function cnvSec($ss) {
@@ -370,9 +261,9 @@ function cnvSec($ss) {
 	$d = floor(($ss%2592000)/86400);
 	$M = floor($ss/2592000);
 	$val = "$m:$s";
-	if ( $h > '0' ) { $val = $h.":".$val; }
-	if ( $d > '0' ) { $val = $d."-".$val; }
-	if ( $M > '0') { $val = $M."-".$val; }
+	if ( $h > '0' ) { $val = $h.":".$val; } else { $val = '00:'.$val; }
+	if ( $d > '0' ) { $val = $d."-".$val; } else { $val = '00-'.$val; }
+	if ( $M > '0') { $val = $M."-".$val; } else { $val = '00-'.$val; }
 	return($val);
 }
 
@@ -411,40 +302,6 @@ function sigCheck($daemon, $ini, $logger) {
 	$daemon['new-signal'] = false;
 	return($daemon);
 }
-
-/*function ctlDaemon($ini, $logger) {
-	// This function should never return, every exit should be to 'shutdown'
-	$logger->info("Starting daemon processing");
-	$array = parse_ini_file($ini['config']);
-	switch ($ini['daemon']) {
-		case 'start':
-			$array[verbose] = false;
-		case 'stop':
-			$logger->notice("Sending SIGTERM to daemon");
-			if ( file_exists($ini['lockfilepath']) ) {
-				$pid = file_get_contents($ini['lockfilepath']);
-				posix_kill($pid, 'SIGTERM');
-			} else {
-				$logger->notice("No daemon running");
-			}
-			break;
-		case 'kill':
-			if ( file_exists($ini['lockfilepath']) ) {
-				$logger->notice("Killing current daemon");
-				$pid = file_get_contents($ini['lockfilepath']);
-				posix_kill($pid, 'SIGKILL');
-			} else {
-				$logger->notice("No daemon running");
-			}
-			break;
-		case 'stats':
-			doStats();
-			break;
-		default:
-			$logger->crit("Unknown option -> $act");
-			shutdown($ini, $logger);
-	}
-}*/
 
 function getLock($ini, $logger) {
 	$logger->info("Getting lock file");
@@ -503,21 +360,18 @@ function init($ini) {
 	$file = Log::singleton('file', $ini['logfilepath'], 'init');
 	$logger = Log::singleton('composite');
 	$logger->addChild($file); 
+
 	if ( $ini['verbose'] ) { 
 		$console = Log::singleton('console', '', 'init');
 		$logger->addChild($console); 
 	}
 
 	$mask = Log::MAX($ini['loglevel']);
-	$console->setMask($mask);
+	$logger->setMask($mask); 
 
 	if ( $ini['write'] ) { saveconfig($ini, $logger); }
 
-	if ( $ini["daemon"] ) { ctlDaemon($ini, $logger); }
-
 	getLock($ini, $logger);
-
-	$stats = initStats($logger);
 
 	$daemon = array(
 		'cleanexit' => false,
@@ -526,7 +380,7 @@ function init($ini) {
 	);
 
 	$logger->setIdent('nnup');
-	return array($stats, $daemon, $logger);
+	return array($daemon, $logger);
 }
 
 function parseOpts() {
@@ -552,22 +406,13 @@ Use: newznab_update.php [-opts]
     --optint=<Number>      <Number> of seconds between opt runs (Default: 43200)
 
  Newznab Options:
+ 	-s                     Skip update_binaries (For importing)
     --threads=<threads>    Use threading where supported with <threads> number of threads
     --import=<Directory>   Import NZBs from <directory>
     --impnum=<Number>      Import <Number> of nzbs per loop (Default: 100)
-   ***<FUTURE>***
+    --catchup              Skip import binaries and post processing 
     --backfill=<Date>      Backfill active groups to <date>
                               Format: YYYY-MM-DD
-
- Daemon Options:
-    ***<FUTURE>***
-	* Can not be combined with any other options
-	* Requires configuration file
-	--daemon=<status>       Start Daemon mode and exicute <status>
-	    start                  Start daemon with options in configuration
-	    stop                   exit after current loop
-	    kill                   exit instantly (Same as kill -9)
-	    status                 Check status and return stats
 
  Examples:
     Basic update loop, pause for 10 minutes:
@@ -586,21 +431,11 @@ Use: newznab_update.php [-opts]
 
     Screen mode (Same process as newznab_cron, with enhancements):
         screen newznab_update.php -v --loop=10
-
-    ***< Future >***
-    Daemon mode
-
-        Set basic config:
-          newznab_update.php --threads=10 --import=/tmp/nzbs --importnum=500 -w
-        Start daemon
-          newznab_update.php --daemon=start
-        Get stats:
-          newznab_update --daemon=status
 STR;
 	// Get commandline options
 	$cg = new Console_Getopt();
-	$allowedShortOptions = "hvpcwdq";
-	$allowedLongOptions = array("loop==", "enh-loop==", "backfill==", "import==", "impnum==", "threads==", "optint==", "loglevel==");
+	$allowedShortOptions = "hvpcwsdq";
+	$allowedLongOptions = array("loop==", "enh-loop==", "backfill==", "import==", "impnum==", "threads==", "optint==", "loglevel==", "catchup", "skipbin");
 	$args = $cg->readPHPArgv();
 	$ret = $cg->getopt($args, $allowedShortOptions, $allowedLongOptions);
 
@@ -631,7 +466,9 @@ STR;
 		'import'   => false,
 		'impnum'   => '100',
 		'optint'   => '43200',
-		'daemon'   => false
+		'daemon'   => false,
+		'skipbin'  => false,
+		'catchup'  => false
 	);
 	
 	if (sizeof($options) > 0 ) {
@@ -639,7 +476,7 @@ STR;
 			switch ($o[0]) {
 				case 'h':
 					echo "$help_long\n";
-					break;
+					exit;
 				case 'v':
 					$array['verbose'] = true;
 					break;
@@ -657,7 +494,6 @@ STR;
 					break;
 				case 'w':
 					$array['write'] = true;
-					break;
 				case '--loop':
 					$array['loop'] = $o[1];
 					break;
@@ -684,6 +520,12 @@ STR;
 					break;
 				case '--loglevel':
 					$array['loglevel'] = $o[1];
+					break;
+				case '--catchup':
+					$array['catchup'] = true;
+					break;
+				case '--skipbin':
+					$array['skipbin'] = true;
 					break;
 			}
 		}
